@@ -3,10 +3,12 @@ package com.viaplay.im.hardware;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.annotation.SuppressLint;
 import android.view.KeyEvent;
 
 
 
+@SuppressLint("UseSparseArrays")
 public class JoyStickTypeF {
 	public static final int BUTTON_SEARCH_SCANCODE = 217;
 	public static final int BUTTON_A_SCANCODE = 304;
@@ -37,7 +39,9 @@ public class JoyStickTypeF {
 	public static final int BUTTON_RZI_SCANCODE = 0x7f08;
 	public static final int BUTTON_GAS_SCANCODE = 0x7f09;
 	public static final int BUTTON_BRAKE_SCANCODE = 0x7f0a;
-	
+	public static final int BUTTON_HOME_SCANCODE = 172;
+	public static final int BUTTON_BACK_SCANCODE = 158;
+	public static final int BUTTON_MENU_SCANCODE = 127;
 	public static final int RIGHT_JOYSTICK_TAG = 1;
 	public static final int LEFT_JOYSTICK_TAG = 2;
 	public static final int JOYSTICK_ZOOM_1_TAG =0x3;
@@ -146,6 +150,9 @@ public class JoyStickTypeF {
 		{"",  null ,"",null,  null,  null,  null,  null,  null,  null,  null,  null,   null,  "", null, ""},
 		{null,   "",null,  null,  null,  null,  null,  null,  null,  null,  null,  null,  null,  null,  "",null},
 	};
+	
+	
+	
 	static {
 		typeFKeyMap.put(BUTTON_A_SCANCODE, KeyEvent.KEYCODE_BUTTON_A);
 		typeFKeyMap.put(BUTTON_B_SCANCODE, KeyEvent.KEYCODE_BUTTON_B);
@@ -159,7 +166,10 @@ public class JoyStickTypeF {
 		typeFKeyMap.put(BUTTON_L2_SCANCODE, KeyEvent.KEYCODE_BUTTON_L2);
 		typeFKeyMap.put(BUTTON_R2_SCANCODE, KeyEvent.KEYCODE_BUTTON_R2);
 		typeFKeyMap.put(BUTTON_BRAKE_SCANCODE, KeyEvent.KEYCODE_BUTTON_R2);
-
+		typeFKeyMap.put(BUTTON_HOME_SCANCODE, KeyEvent.KEYCODE_HOME);
+		typeFKeyMap.put(BUTTON_BACK_SCANCODE, KeyEvent.KEYCODE_BACK);
+		typeFKeyMap.put(BUTTON_MENU_SCANCODE, KeyEvent.KEYCODE_MENU);
+		
 		typeFKeyMap.put(BUTTON_SELECT_SCANCODE, KeyEvent.KEYCODE_BUTTON_SELECT);
 		typeFKeyMap.put(BUTTON_START_SCANCODE, KeyEvent.KEYCODE_BUTTON_START);
 		typeFKeyMap.put(BUTTON_UP_SCANCODE, KeyEvent.KEYCODE_DPAD_UP);

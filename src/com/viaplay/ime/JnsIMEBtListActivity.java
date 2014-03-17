@@ -32,16 +32,16 @@ public class JnsIMEBtListActivity extends Activity {
 	static List<JnsIMEBtDeviceInfo> devList = new ArrayList<JnsIMEBtDeviceInfo>();
 	static JnsIMEControlListAdapter adapter  = new JnsIMEControlListAdapter();
 	public Handler discoveryHandler;
-
+	static BluetoothAdapter mAdapter;
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		this.setContentView(R.layout.bt_device_list);
-		final BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
+	    mAdapter = BluetoothAdapter.getDefaultAdapter();
 		JnsIMEApplication app = (JnsIMEApplication) this.getApplicationContext();
 		app.btlistActivity = this;
-		mAdapter.startDiscovery();
+		//mAdapter.startDiscovery();
 		devicesView = (ListView) this.findViewById(R.id.btlist);
 		pb = (ProgressBar) this.findViewById(R.id.progressBar1);
 		alert = (TextView) this.findViewById(R.id.alert);
@@ -102,7 +102,8 @@ public class JnsIMEBtListActivity extends Activity {
 			devList.add(devInfo);
 		}
 		 */
-		for(BluetoothDevice device: JnsIMEBtReceiver.devices)
+	//	for(BluetoothDevice device: JnsIMEBtReceiver.devices)
+		for(BluetoothDevice device: mAdapter.getBondedDevices())
 		{
 			JnsIMEBtDeviceInfo devInfo = new JnsIMEBtDeviceInfo();
 			devInfo.setName(device.getName());

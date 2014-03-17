@@ -2,7 +2,7 @@ package com.viaplay.ime.bean;
 
 import com.viaplay.im.hardware.JoyStickTypeF;
 /**
- * Type的按键映射类，区别在于scancode的按键的索引
+ * Typeμ?°′?üó3é?àà￡???±e?úóúscancodeμ?°′?üμ??÷òy
  * 
  *  
  * @author Steven.xu

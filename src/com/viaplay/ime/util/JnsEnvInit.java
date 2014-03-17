@@ -107,13 +107,13 @@ public class JnsEnvInit {
 		}
 
 	}
+	@SuppressLint("SdCardPath")
 	public static boolean startJnsInputServier()
 	{
 		JnsIMERoot.setContext(mContext);
-		JnsIMERoot.initConsole();
-		movingFile("/mnt/sdcard/jnsinput/screencap.sh", "screencap.sh");
-		if(movingFile("/mnt/sdcard/jnsinput/jnsinput.jar", "jnsinput.jar"))
-			if(movingFile("/mnt/sdcard/jnsinput/jnsinput.sh", "jnsinput.sh"))
+		movingFile("/mnt/sdcard/viaplay/screencap.sh", "screencap.sh");
+		if(movingFile("/mnt/sdcard/viaplay/jnsinput.jar", "jnsinput.jar"))
+			if(movingFile("/mnt/sdcard/viaplay/jnsinput.sh", "jnsinput.sh"))
 				runJnsInput();
 		return false;
 	}
@@ -124,7 +124,6 @@ public class JnsEnvInit {
 	 */
 	public static boolean root()
 	{
-		/*
 		try {
 			process = Runtime.getRuntime().exec("su");
 			if(process ==null)
@@ -180,8 +179,6 @@ public class JnsEnvInit {
 			return false;
 		}
 		return true;
-		*/
-		return false;
 	}
 	/**
 	 * 检查设备是否已经获得root授权
@@ -212,12 +209,9 @@ public class JnsEnvInit {
 		if(rooted)
 		{	
 			try {
-				//Process process = Runtime.getRuntime().exec("sh /mnt/sdcard/jnsinput/jnsinput.sh");
 				Process jarprocess = Runtime.getRuntime().exec("su");
 				DataOutputStream jardos = new DataOutputStream(jarprocess.getOutputStream());
-				jardos.write("rm /data/jnsinput/jnsinput.jar \n".getBytes());
-				jardos.flush();
-				String cmd = "export LD_LIBRARY_PATH=/vender/lib; export CLASSPATH=/mnt/sdcard/jnsinput/jnsinput.jar; exec app_process /system/bin com.blueocean.jnsinput.JNSInputServer \n";
+				String cmd = "export LD_LIBRARY_PATH=/vender/lib; export CLASSPATH=/mnt/sdcard/viaplay/jnsinput.jar; exec app_process /system/bin com.blueocean.jnsinput.JNSInputServer \n";
 				jardos.write(cmd.getBytes());
 				jardos.flush();
 			} catch (IOException e) {
@@ -230,8 +224,6 @@ public class JnsEnvInit {
 	{
 		dos.flush();
 		dos.writeBytes("chmod 777 /dev/input/* \n");
-		dos.flush();
-		dos.write("chmod 777 /dev/graphics/fb* \n".getBytes());
 		dos.flush();
 	}
 

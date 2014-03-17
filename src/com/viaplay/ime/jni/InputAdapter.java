@@ -75,14 +75,14 @@ public class InputAdapter {
 			// TODO Auto-generated method stub
 			while (true) {
 				getKey();
-				Log.d(TAG, "keyEvent.scanCode="+keyEvent.scanCode+"keyEvent.value"+keyEvent.value );
+				//Log.d(TAG, "keyEvent.scanCode="+keyEvent.scanCode+"keyEvent.value"+keyEvent.value );
 				if(JnsIMEInputMethodService.validAppName.equals("com.silvertree.cordy"))
 					keyEvent.deviceId = 0;
 				if (keyEvent.value == 1) 
 				{
 					keyEvent.value = KeyEvent.ACTION_DOWN;
 					CheckIMESwitch();
-					Log.d(TAG, "get a key down");
+					//Log.d(TAG, "get a key down");
 					onRawKeyDown(keyEvent);
 				} 
 				else if(keyEvent.value == 2)
@@ -95,7 +95,7 @@ public class InputAdapter {
 						mCheckByte  = (byte) (mCheckByte & 0xfe);
 					if(keyEvent.scanCode == SELECT_SCANCODE) 
 						mCheckByte =  (byte) (mCheckByte & 0xfd);
-					Log.d(TAG, "get a key up");
+					//Log.d(TAG, "get a key up");
 					keyEvent.value = KeyEvent.ACTION_UP;
 					onRawKeyUp(keyEvent);
 				}
@@ -112,7 +112,7 @@ public class InputAdapter {
 		@Override
 		public void run() 
 		{
-			Log.d(TAG, "x = "+JoyEvent.x+ ", y = "+JoyEvent.y + "z = "+JoyEvent.z+  "rz = "+JoyEvent.rz);
+			//Log.d(TAG, "x = "+JoyEvent.x+ ", y = "+JoyEvent.y + "z = "+JoyEvent.z+  "rz = "+JoyEvent.rz);
 
 			// TODO Auto-generated method stub
 			while (true) 
@@ -148,7 +148,7 @@ public class InputAdapter {
 						gHatDownPressed =true;
 						onRawKeyDown(keyevent);
 					}
-
+					
 					if((JoyEvent.hat_x == 0) && hatRightPressed)
 					{
 						RawEvent keyevent = new RawEvent(0, JoyStickTypeF.BUTTON_RIGHT_SCANCODE, KeyEvent.ACTION_UP, JoyEvent.deviceId);
@@ -216,7 +216,6 @@ public class InputAdapter {
 						//gHatLeftPressed =true;
 						onRawKeyDown(keyevent);
 					}
-					// 在触摸映射界面将头盔转换为DPAD键
 					if(JnsIMECoreService.touchConfiging && JnsIMECoreService.ime != null)
 					{
 						if(((JoyEvent.x != 127) || (JoyEvent.y != 127)) && !leftStickPressed)	
@@ -240,8 +239,8 @@ public class InputAdapter {
 							rightStickPressed = false;
 						}
 					}
-
-
+					
+						
 					//Log.d(TAG, "x = "+JoyEvent.x+ ", y = "+JoyEvent.y + "z = "+JoyEvent.z+  "rz = "+JoyEvent.rz+"  hat_x = "+ JoyEvent.hat_x +" hat y ="+  JoyEvent.hat_y + 
 					//		"gas = " + JoyEvent.gas + "brake = "+JoyEvent.brake);
 					Message msg = new Message();
@@ -262,7 +261,7 @@ public class InputAdapter {
 			mCheckByte  = (byte) (mCheckByte | 0x01);
 		if(keyEvent.scanCode == SELECT_SCANCODE) 
 			mCheckByte =  (byte) (mCheckByte | 0x02);
-		Log.d(TAG, "mCheckByte="+mCheckByte+",mIMEMode="+mIMEMode);
+		//Log.d(TAG, "mCheckByte="+mCheckByte+",mIMEMode="+mIMEMode);
 		if(mCheckByte == 0x03)
 		{
 			//	Toast.makeText(mcontext, "qiehuan ime", Toast.LENGTH_LONG).show();
@@ -305,18 +304,18 @@ public class InputAdapter {
 			}
 		}
 	}
-	private static void onRawKeyDown(RawEvent keyEvent) {
-		Log.e(TAG, "onRawKeyDown scanCode = " + keyEvent.scanCode + " value = " + keyEvent.value);
+	private static synchronized void onRawKeyDown(RawEvent keyEvent) {
+		//Log.e(TAG, "onRawKeyDown scanCode = " + keyEvent.scanCode + " value = " + keyEvent.value);
 		Message msg = new Message();
 		msg.what = JnsIMECoreService.HAS_KEY_DATA;
 		RawEvent event = new RawEvent(keyEvent.keyCode, keyEvent.scanCode, keyEvent.value, keyEvent.deviceId);
 		JnsIMECoreService.keyQueue.add(event);
 		JnsIMECoreService.DataProcessHandler.sendMessage(msg);
-		Log.d(TAG, "current time is "+System.currentTimeMillis());
+		//Log.d(TAG, "current time is "+System.currentTimeMillis());
 	}
 
-	private static void onRawKeyUp(RawEvent keyEvent) {
-		Log.e(TAG, "onRawKeyUp scanCode = " + keyEvent.scanCode + " value = " + keyEvent.value);
+	private static synchronized void onRawKeyUp(RawEvent keyEvent) {
+		//Log.e(TAG, "onRawKeyUp scanCode = " + keyEvent.scanCode + " value = " + keyEvent.value);
 		Message msg = new Message();
 		msg.what = JnsIMECoreService.HAS_KEY_DATA;
 		RawEvent event = new RawEvent(keyEvent.keyCode, keyEvent.scanCode, keyEvent.value, keyEvent.deviceId);

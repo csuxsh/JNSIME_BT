@@ -1,18 +1,17 @@
 package com.viaplay.ime.uiadapter;
 
 import java.io.File;
+import java.util.Locale;
 
 import com.viaplay.ime.R;
 import com.viaplay.ime.JnsIMECoreService;
 import com.viaplay.ime.JnsIMEGameListActivity;
 import com.viaplay.ime.JnsIMEKeyMappingActivity;
-import com.viaplay.ime.bean.GameInfo;
+import com.viaplay.ime.util.GameInfo;
 
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -25,13 +24,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
- * 主界面显示游戏列表的适配器
+ * ?÷??????ê?ó??·áD±íμ?êê???÷
  * 
  * @author Steven.xu
  *
@@ -49,7 +47,7 @@ public class JnsIMEGameListAdapter extends BaseAdapter implements OnClickListene
 	private ImageButton  keymapping;
 	private ImageButton  delete;
 	private PackageManager pm;
-	
+
 	public void setCursor(Cursor cursor) {
 		this.cursor = cursor;
 	}
@@ -72,8 +70,9 @@ public class JnsIMEGameListAdapter extends BaseAdapter implements OnClickListene
 	@Override
 	public Object getItem(int arg0) {
 		// TODO Auto-generated method stub
-		 cursor.moveToPosition(arg0);
-		 return cursor;
+		cursor.moveToPosition(arg0);
+		return cursor;
+
 	}
 
 	@Override
@@ -94,7 +93,41 @@ public class JnsIMEGameListAdapter extends BaseAdapter implements OnClickListene
 		GameInfo game = new GameInfo();
 		game.setPkgname(cursor.getString(cursor.getColumnIndex("_name")));
 		game.setExists(new Boolean(cursor.getString(cursor.getColumnIndex("_exists"))));
-		game.setLable(cursor.getString(cursor.getColumnIndex("_description")));
+		if(Locale.getDefault().getLanguage().startsWith("zh"))
+		{	
+			game.setUrl(cursor.getString(cursor.getColumnIndex("_url")));
+			if(game.getUrl() == null || game.getUrl().equals(""))
+				game.setUrl("https://play.google.com/store/apps/details?id="+game.getPkgname());
+
+		}
+		else
+		{	
+			Uri uri = Uri.parse("https://play.google.com/store/apps/details?id="+game.getPkgname());  
+			if(game.getPkgname().equals("com.androidemu.n64"))
+				uri = Uri.parse("http://slideme.org/application/n64oid");
+			else if(game.getPkgname().equals("fr.mydedibox.afba"))
+				uri = Uri.parse("http://forum.xda-developers.com/showthread.php?t=1932280");
+			else if(game.getPkgname().equals("com.joyemu.fbaapp"))
+				uri = Uri.parse("http://hi.baidu.com/tofro/item/c1dde9d837b2214efb5768c3");
+			else if(game.getPkgname().equals("com.kawaks"))
+				uri = Uri.parse("http://www.kawaks.net/");
+			else if(game.getPkgname().equals("com.eamobile.tetris_eu"))
+				uri = Uri.parse("http://www.1mobile.com/com-ea-tetrisfree-na-350822.html");
+			else if(game.getPkgname().equals("com.bistudio.at"))
+				uri = Uri.parse("http://samsungapps.sina.cn/topApps/topAppsDetail.as?productId=000000684336");
+			else if(game.getPkgname().equals("com.tiger.game.arcade2"))
+				uri = Uri.parse("http://slideme.org/application/tiger-arcade");
+			else if(game.getPkgname().equals("com.retrobomb.expendablerearmed"))
+				uri = Uri.parse("http://android.mob.org/download/a3303.html");
+
+			game.setUrl(uri+"");
+		}
+		if(Locale.getDefault().getLanguage().startsWith("zh"))
+			game.setLable(cursor.getString(cursor.getColumnIndex("_lable_zh")));
+		else
+			game.setLable(cursor.getString(cursor.getColumnIndex("_lable")));
+		if(game.getLable() == null || game.getLable().equals(""))
+			game.setLable(cursor.getString(cursor.getColumnIndex("_lable")));
 		Drawable icon_pic = null;
 		String lable= "";
 		try {
@@ -103,8 +136,8 @@ public class JnsIMEGameListAdapter extends BaseAdapter implements OnClickListene
 			game.setExists(true);
 		} catch (NameNotFoundException e) {
 			// TODO Auto-generated catch block
-			icon_pic = Drawable.createFromPath("mnt/sdcard/jnsinput/app_icon/"+game.getPkgname()+".icon.png");
-			lable = cursor.getString(cursor.getColumnIndex("_description"));
+			icon_pic = Drawable.createFromPath("mnt/sdcard/viaplay/app_icon/"+game.getPkgname()+".icon");
+			lable = game.getLable();//cursor.getString(cursor.getColumnIndex("_description"));
 			game.setExists(false);
 			e.printStackTrace();
 		}
@@ -115,12 +148,11 @@ public class JnsIMEGameListAdapter extends BaseAdapter implements OnClickListene
 		play = (ImageButton) convertView.findViewById(R.id.play);
 		keymapping = (ImageButton) convertView.findViewById(R.id.keymapping);
 		delete = (ImageButton) convertView.findViewById(R.id.delete);
-		Log.d(TAG, cursor.getString(cursor.getColumnIndex("_exists")));
 		get.setOnClickListener(this);
 		keymapping.setOnClickListener(this);
 		delete.setOnClickListener(this);
 		play.setOnClickListener(this);
-		
+
 		if(game.isExists())
 		{	
 			get.setBackgroundResource(R.drawable.get_p);
@@ -141,7 +173,7 @@ public class JnsIMEGameListAdapter extends BaseAdapter implements OnClickListene
 
 		icon.setTag(game.getPkgname());
 		title.setTag(game.getPkgname());
-		get.setTag(game.getPkgname());
+		get.setTag(game.getUrl());
 		keymapping.setTag(game.getPkgname());
 		delete.setTag(game.getPkgname());
 		play.setTag(game.getPkgname());
@@ -157,8 +189,27 @@ public class JnsIMEGameListAdapter extends BaseAdapter implements OnClickListene
 		switch(v.getId())
 		{
 		case R.id.get:
+			Uri uri = Uri.parse((String) v.getTag());  
+			/*
 			Log.d(TAG, "click get of "+ v.getTag());
 			Uri uri = Uri.parse("market://details?id="+v.getTag());  
+			if(v.getTag().equals("com.androidemu.n64"))
+				uri = Uri.parse("http://slideme.org/application/n64oid");
+			else if(v.getTag().equals("fr.mydedibox.afba"))
+				uri = Uri.parse("http://forum.xda-developers.com/showthread.php?t=1932280");
+			else if(v.getTag().equals("com.joyemu.fbaapp"))
+				uri = Uri.parse("http://hi.baidu.com/tofro/item/c1dde9d837b2214efb5768c3");
+			else if(v.getTag().equals("com.kawaks"))
+				uri = Uri.parse("http://www.kawaks.net/");
+			else if(v.getTag().equals("com.eamobile.tetris_eu"))
+				uri = Uri.parse("http://www.1mobile.com/com-ea-tetrisfree-na-350822.html");
+			else if(v.getTag().equals("com.bistudio.at"))
+				uri = Uri.parse("http://samsungapps.sina.cn/topApps/topAppsDetail.as?productId=000000684336");
+			else if(v.getTag().equals("com.tiger.game.arcade2"))
+				uri = Uri.parse("http://slideme.org/application/tiger-arcade");
+			else if(v.getTag().equals("com.retrobomb.expendablerearmed"))
+				uri = Uri.parse("http://android.mob.org/download/a3303.html");
+			 */
 			Intent it = new Intent(Intent.ACTION_VIEW, uri);   
 			activity.startActivity(it);   
 			break;
@@ -184,31 +235,13 @@ public class JnsIMEGameListAdapter extends BaseAdapter implements OnClickListene
 			touchmapping.delete();
 			File keymapping = new File(activity.getFilesDir()+"/"+v.getTag()+".keymap");
 			keymapping.delete();
-			Cursor cursor = JnsIMECoreService.aph.Qurey(null);
+			Cursor cursor = JnsIMECoreService.aph.Qurey(null, "F");
 			JnsIMEGameListActivity.gameAdapter.setCursor(cursor);
 			JnsIMEGameListActivity.gameAdapter.notifyDataSetChanged();
 			break;
 		case R.id.play:
-			final Intent in = new Intent(pm.getLaunchIntentForPackage(""+v.getTag()));
-			Cursor cursor_a = JnsIMECoreService.aph.Qurey((String) v.getTag());
-			String hidonly = cursor_a.getString(cursor_a.getColumnIndex("_hidonly"));
-			if(hidonly !=null && hidonly.equals("true"))
-			{
-				(new AlertDialog.Builder(activity).setMessage(activity.getString(R.string.hid_only) ).setPositiveButton("sure",
-						new DialogInterface.OnClickListener()
-				{
-
-					@Override
-					public void onClick(DialogInterface dialog,
-							int which) {
-						// TODO Auto-generated method stub
-						activity.startActivity(in);
-					}
-					
-				}).setNegativeButton("cancle", null).create()).show();
-			}
-			else
-				activity.startActivity(in);
+			Intent in = new Intent(pm.getLaunchIntentForPackage(""+v.getTag()));
+			activity.startActivity(in);
 			break;
 		}
 	}

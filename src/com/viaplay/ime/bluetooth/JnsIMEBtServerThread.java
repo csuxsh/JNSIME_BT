@@ -26,6 +26,9 @@ import android.widget.Toast;
  */
 
 public class JnsIMEBtServerThread extends Thread{
+	
+	
+	final static String TAG ="";
 
 	BluetoothSocket socket;
 	BluetoothDevice device;
@@ -45,9 +48,6 @@ public class JnsIMEBtServerThread extends Thread{
 	@SuppressLint("NewApi")
 	public void run()
 	{
-		long timeOut = 30000;
-		long startTimer = System.currentTimeMillis();
-
 		for(int i = 0; i < connectingList.size(); i++) 
 		{
 			BluetoothDevice coDevice = connectingList.get(i);
@@ -60,35 +60,10 @@ public class JnsIMEBtServerThread extends Thread{
 		synchronized(connectingList)
 		{
 			connectingList.add(device);
-		}
-		try {
-			//Message msg = new Message();
-			///	msg.what = JnsIMEBtService.START_CONNECT;
-			//mContext.procehandler.sendMessage(msg);
-			//if(device.getBondState() == BluetoothDevice.BOND_NONE)
-			//	JnsIMBtSearchDevice.bondDevice(device);
-			socket = mAdapter.getRemoteDevice(device.getAddress()).createInsecureRfcommSocketToServiceRecord(myuuid);
-			socket.connect();
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			try {
-				socket.close();
-				socket= null;
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			e2.printStackTrace();
-		}
-		while(socket == null || !socket.isConnected() )
+		}		
+		long startTime = System.currentTimeMillis();
+		while(socket == null)
 		{	
-			//if((System.currentTimeMillis() - startTimer) > timeOut)
-			//{
-			//Message msg = new Message();
-			//msg.what = JnsIMEBtService.CONNECT_TIMEOUT;
-			//mContext.procehandler.sendMessage(msg);
-			//	return;
-			//}
 			try 
 			{
 				socket = mAdapter.getRemoteDevice(device.getAddress()).createInsecureRfcommSocketToServiceRecord(myuuid);//createRfcommSocketToServiceRecord(myuuid);
@@ -100,37 +75,35 @@ public class JnsIMEBtServerThread extends Thread{
 				{
 					socket.close();
 					socket= null;
-				//	e.printStackTrace();
+					e.printStackTrace();
 				} 
 				catch (IOException e1)
 				{
-
 					e1.printStackTrace();
 				}
 			}
 			try {
-				Thread.sleep(2500);
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-
-		if(socket != null)
-		{
-			JnsIMEBtDataProcess dataprocess = new JnsIMEBtDataProcess(socket, device, mContext);
-			//	JnsIMEBtDeamoThread deamoThread = new JnsIMEBtDeamoThread(device, mContext);
-			//	deamoThread.socket = socket;
-			//	deamoThread.start();
-			dataprocess.start();
-			Message msg = new Message();
-			synchronized(connectingList)
+			if(System.currentTimeMillis() - startTime > 10000)
 			{
-				connectingList.remove(device);
-			}	
-			//	msg.what = JnsIMEBtService.CONNECT_OK;
-			//	mContext.procehandler.sendMessage(msg);
+				synchronized(connectingList)
+				{
+					connectingList.remove(device);
+				}
+				Log.d(TAG, "device:"+device.getAddress()+"connect time out");
+				return;
+			}
 		}
+		JnsIMEBtDataProcess dataprocess = new JnsIMEBtDataProcess(socket, device, mContext);
+		dataprocess.start();
+		synchronized(connectingList)
+		{
+			connectingList.remove(device);
+		}	
+		
 	}
-	//}
 }

@@ -149,7 +149,7 @@ public class JnsIMETpConfigActivity extends Activity implements OnTouchListener,
 					Bitmap draw_bmp = null;
 					while(draw_bmp ==null)
 					{	
-						draw_bmp  = BitmapFactory.decodeFile("/mnt/sdcard/jnsinput/tmp.bmp");		
+						draw_bmp  = BitmapFactory.decodeFile("/mnt/sdcard/viaplay/tmp.bmp");		
 						//draw_bmp = Drawable.createFromPath("/mnt/sdcard/jnsinput/tmp.bmp");
 					}
 					// 如果是是手机则需要旋转切图

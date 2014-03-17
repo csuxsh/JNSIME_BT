@@ -40,7 +40,6 @@ public class JoyStickEvent {
 	int hat_x;
 	int gas;
 	int brake;
-	
 	public int getGas() {
 		return gas;
 	}

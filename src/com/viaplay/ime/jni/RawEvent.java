@@ -1,7 +1,7 @@
 package com.viaplay.ime.jni;
 
 /**
- *  存储操控器发来的按键的数据的数据结构
+ *  ′?′￠2ù???÷·￠à′μ?°′?üμ?êy?Yμ?êy?Y?á11
  * 
  * @author Steven
  *

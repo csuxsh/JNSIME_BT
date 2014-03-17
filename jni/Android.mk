@@ -35,23 +35,6 @@ LOCAL_MODULE:= libjni_input_adapter
 include $(BUILD_SHARED_LIBRARY)
 #include $(LOCAL_PATH)/Android.mk.bk
 ############################################################
-include $(CLEAR_VARS)
-LOCAL_MODULE_TAGS := eng
-LOCAL_MODULE:=libjni_console
-LOCAL_LDLIBS := -ldl -llog
-LOCAL_SRC_FILES:= \
-  termExec.cpp
-LOCAL_SHARED_LIBRARIES := \
-	libutils
-LOCAL_LDLIBS := -ldl -llog
-LOCAL_STATIC_LIBRARIES :=
-LOCAL_C_INCLUDES += \
-	$(JNI_H_INCLUDE)
-# No special compiler flags.
-LOCAL_CFLAGS +=
-LOCAL_PRELINK_MODULE := false
-include $(BUILD_SHARED_LIBRARY)
-############################################################
 ############################################################
 include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := eng

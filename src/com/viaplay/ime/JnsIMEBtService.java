@@ -98,7 +98,7 @@ public class JnsIMEBtService extends Service {
 				switch(msg.what)
 				{
 				case START_CONNECT:
-					connectDevices();
+					//connectDevices();
 					/*
 					pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 					pDialog.setMessage("connecting device...");

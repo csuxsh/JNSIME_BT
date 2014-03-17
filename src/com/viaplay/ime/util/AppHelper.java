@@ -2,8 +2,10 @@ package com.viaplay.ime.util;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Locale;
 
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -29,13 +31,14 @@ public class AppHelper {
 		dbh  = DBHelper.getDBHelper(context);
 		this.context = context;
 	}
-    /**
-     * 向数据库插入一个应用的信息，并且将应用的图标半场到sdcard上。如果该应用已经存在于数据则先删除记录再插入
-     * 
-     * @param 应用的包名
-     * @param 应用是否已经安装
-     * @return 操作成功返回true,失败返回false
-     */
+	/**
+	 * 向数据库插入一个应用的信息，并且将应用的图标半场到sdcard上。如果该应用已经存在于数据则先删除记录再插入
+	 * 
+	 * @param 应用的包名
+	 * @param 应用是否已经安装
+	 * @return 操作成功返回true,失败返回false
+	 */
+	@SuppressLint("SdCardPath")
 	synchronized public boolean Insert(String name, String exists)
 	{
 		PackageManager pm = context.getPackageManager();
@@ -49,7 +52,7 @@ public class AppHelper {
 			e1.printStackTrace();
 			return false;
 		}
-		File icon_file = new File("/mnt/sdcard/jnsinput/app_icon/"+name+".icon.png");
+		File icon_file = new File("/mnt/sdcard/viaplay/app_icon/"+name+".icon");
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(icon_file);
@@ -66,7 +69,9 @@ public class AppHelper {
 		db.delete(DBHelper.TABLE, "_name=?", new String[] { name });
 		ContentValues cv = new ContentValues();
 		cv.put("_name", name);
-		cv.put("_description", lable);
+		cv.put("_lable", lable);
+		cv.put("_lable_zh", lable);
+		cv.put("_control", "F");
 		cv.put("_exists", exists);
 		try {
 			if(db.insert(DBHelper.TABLE, "", cv)> -1)
@@ -78,44 +83,52 @@ public class AppHelper {
 		}
 		return false;
 	}
-    /**
-     * 在数据库中删除一个应用。
-     * 
-     * @param 应用的包名
-     * @return 操作成功返回true,失败返回false
-     */
+	/**
+	 * 在数据库中删除一个应用。
+	 * 
+	 * @param 应用的包名
+	 * @return 操作成功返回true,失败返回false
+	 */
 	synchronized public boolean delete(String name)
 	{
 		SQLiteDatabase db = dbh.getReadableDatabase();
-		File file = new File("mnt/sdcard/jnsinput/app_icon/"+name+".icon.png");
+		File file = new File("mnt/sdcard/viaplay/app_icon/"+name+".icon");
 		if(file.exists())
 			file.delete();
 		if(db.delete(DBHelper.TABLE, "_name=?", new String[] { name }) >0)
 			return false;
 		return true;
 	}
-    /**
-     * 在数据库中查询指定应用
-     * 
-     * @param 应用的包名
-     * @return 数据库的cursor
-     */
-	synchronized public Cursor Qurey(String arg)
+	/**
+	 * 在数据库中查询指定应用
+	 * 
+	 * @param 应用的包名
+	 * @param 操控器型号
+	 * @return 数据库的cursor
+	 */
+	@SuppressWarnings("null")
+	synchronized public Cursor Qurey(String arg, String controll)
 	{
 		//String arg = startdate+" and "+enddate;
-		String selection = "_name=?";
-		String args[] = {arg};
-		if(arg == null || arg.equals(""))
-		{	
-			selection = null;
+		String selection = null;
+		String args[] = new String[1];
+		if((controll != null) || (!controll.equals("")))
+		{
+			selection = "_control like ?";
+			args[0] = "%"+controll+"%";
+		}
+		else
 			args = null;
-		}	
-		
 		SQLiteDatabase db = dbh.getReadableDatabase();
 		Cursor cursor = null;
+		String order = null;
+		if(Locale.getDefault().getLanguage().startsWith("zh"))
+			order= "_lable_zh COLLATE LOCALIZED";
+		else
+			order = "_lable";
 		try {
 			cursor = db.query(DBHelper.TABLE, null, selection,
-					args, null, null, "_description");
+					args, null, null, order);
 			if(cursor.moveToFirst())
 			{
 				System.out.println("cuisor has content");

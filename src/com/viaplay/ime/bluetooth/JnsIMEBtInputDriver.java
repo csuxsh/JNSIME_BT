@@ -4,7 +4,6 @@ import com.viaplay.im.hardware.JoyStickTypeF;
 import com.viaplay.ime.jni.InputAdapter;
 import com.viaplay.ime.jni.JoyStickEvent;
 import com.viaplay.ime.jni.RawEvent;
-import com.viaplay.ime.util.SendEvent;
 
 /***
  * ¿∂—¿ ‰»Î«˝∂Ø
@@ -24,36 +23,38 @@ public class JnsIMEBtInputDriver {
 
 		0xff, 0xff, 0, 1, 1, 1, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0
 	};
-	final static int BUTTON_A_INDEX = 0x00;
-	final static int BUTTON_B_INDEX = 0x01;
-	final static int BUTTON_C_INDEX = 0x02;
-	final static int BUTTON_X_INDEX = 0x03;
-	final static int BUTTON_Y_INDEX = 0x04;
-	final static int BUTTON_Z_INDEX = 0x05;
-	final static int BUTTON_L1_INDEX = 0x06;
-	final static int BUTTON_R1_INDEX = 0x07;
+	
 
 
-
-	final static int[] GAME_BUTTON1_SCANCODE =
-		{
+	final static int[] GAME_ABXY_SCANCODE = 
+	{
+		0,
+		0,
+		0,
+		0,
 		JoyStickTypeF.BUTTON_A_SCANCODE,
 		JoyStickTypeF.BUTTON_B_SCANCODE,
-		JoyStickTypeF.BUTTON_C_SCANCODE,
 		JoyStickTypeF.BUTTON_X_SCANCODE,
 		JoyStickTypeF.BUTTON_Y_SCANCODE,
-		JoyStickTypeF.BUTTON_Z_SCANCODE,
+	};
+	final static int[] GAME_BUTTON1_SCANCODE =
+		{
 		JoyStickTypeF.BUTTON_L1_SCANCODE,
 		JoyStickTypeF.BUTTON_R1_SCANCODE,
-
+		JoyStickTypeF.BUTTON_HOME_SCANCODE,
+		JoyStickTypeF.BUTTON_BACK_SCANCODE,
+		JoyStickTypeF.BUTTON_MENU_SCANCODE,
+		JoyStickTypeF.BUTTON_L2_SCANCODE,
+		JoyStickTypeF.BUTTON_R2_SCANCODE,
+		JoyStickTypeF.BUTTON_SELECT_SCANCODE,
 		};
 
 	final static int[] GAME_BUTTON2_SCANCODE =
 		{
-		JoyStickTypeF.BUTTON_L1_SCANCODE,
-		JoyStickTypeF.BUTTON_R2_SCANCODE,
-		JoyStickTypeF.BUTTON_SELECT_SCANCODE,
 		JoyStickTypeF.BUTTON_START_SCANCODE,
+		0,
+		0,
+		0,
 		0,
 		0,
 		0,
@@ -71,9 +72,23 @@ public class JnsIMEBtInputDriver {
 		joyevent.setRz(data.data[JnsIMEBtDataProcess.ABS_RZ_INDEX]);
 		joyevent.setGas(data.data[JnsIMEBtDataProcess.GAS_INDEX]);
 		joyevent.setBrake(data.data[JnsIMEBtDataProcess.BRAKE_INDEX]);
-		joyevent.setHat_x(HAT_X[data.data[JnsIMEBtDataProcess.HAT_INDEX]]);
-		joyevent.setHat_y(HAT_Y[data.data[JnsIMEBtDataProcess.HAT_INDEX]]);
+		joyevent.setHat_x(HAT_X[data.data[JnsIMEBtDataProcess.HAT_INDEX] & 0xf] );
+		joyevent.setHat_y(HAT_Y[data.data[JnsIMEBtDataProcess.HAT_INDEX] & 0xf] );
 		dispathJoyEvent(joyevent);
+	}
+	private static void gameButtonABXYAnalyse(JnsIMEBtDataStruct data) {
+		byte diff = (byte) ((data.data[JnsIMEBtDataProcess.HAT_INDEX] & 0xf0) ^ 
+				(0xf0 & JnsIMEBtDataProcess.gamePadData[JnsIMEBtDataProcess.HAT_INDEX]));
+		for(int i = 0; i < GAME_ABXY_SCANCODE.length;  i ++)
+		{
+			if((diff & (0x01 << i)) != 0)
+			{
+				RawEvent keyevent = new RawEvent(0, GAME_ABXY_SCANCODE[i], 
+						(data.data[JnsIMEBtDataProcess.HAT_INDEX] & (0x01 << i)) >> i, 
+						0);
+				dispathKeyEvent(keyevent);
+			}
+		}
 	}
 	private static void gameButton1Analyse(JnsIMEBtDataStruct data)
 	{
@@ -112,6 +127,10 @@ public class JnsIMEBtInputDriver {
 		{
 			joyDataAnalyse(data);
 		}
+		if(data.getDataTag() == JnsIMEBtDataProcess.GAME_ABXY_DATA_TAG)
+		{
+			gameButtonABXYAnalyse(data);
+		}
 		if(data.getDataTag() == JnsIMEBtDataProcess.GAME_BUTTON1_DATA_TAG)
 		{
 			gameButton1Analyse(data);
@@ -121,6 +140,7 @@ public class JnsIMEBtInputDriver {
 			gameButton2Analyse(data);
 		}
 	}
+
 	static void dispathKeyEvent(RawEvent keyevent)
 	{
 		//SendEvent.getSendEvent().sendKey(keyevent);

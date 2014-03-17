@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * 数据库操作的帮助类
+ * êy?Y?a2ù×÷μ?°??úàà
  * 
  * @author Steven.xu
  *
@@ -16,9 +16,9 @@ public class DBHelper extends SQLiteOpenHelper {
 	
 	private static DBHelper dbh= null;
 	/**
-	 *  数据库表名
+	 *  êy?Y?a±í??
 	 */
-	public final static String TABLE = "_jns_ime";
+	public final static String TABLE = "_via_game";
 
 	private DBHelper(Context context, String name, CursorFactory factory,
 			int version) {
@@ -33,8 +33,11 @@ public class DBHelper extends SQLiteOpenHelper {
 		"_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
 		 "_name VARCHAR," +
 		 "_exists VARCHAR,"+
-		 "_description VARCHAR," +
-		 "_hidonly VARCHAR)";
+		 "_lable VARCHAR,"+
+		 "_lable_zh VARCHAR,"+
+		 "_control VARCHAR,"+
+		 "_url VARCHAR,"+
+		 "_description VARCHAR)";
 		
 		arg0.execSQL(sql);
 	}
@@ -46,8 +49,12 @@ public class DBHelper extends SQLiteOpenHelper {
 		arg0.execSQL(sql1);
 		String sql = "CREATE TABLE "+TABLE+" (" +
 		"_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-		 "_name VARCHAR," +
+		"_name VARCHAR," +
 		 "_exists VARCHAR,"+
+		 "_lable VARCHAR,"+
+		 "_lable_zh VARCHAR,"+
+		 "_control VARCHAR,"+
+		 "_url VARCHAR,"+
 		 "_description VARCHAR)";
 		
 		arg0.execSQL(sql);

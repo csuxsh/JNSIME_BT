@@ -89,7 +89,7 @@ public class JnsIMEPopAddAdapter extends BaseAdapter {
 		List<ResolveInfo> rlist = pm.queryIntentActivities(mainIntent, 0);
 		isSelected = new HashMap<Integer, Boolean>();
 		Iterator<ResolveInfo> iterator = rlist.iterator();
-		Cursor cusor= JnsIMECoreService.aph.Qurey(null);
+		Cursor cusor= JnsIMECoreService.aph.Qurey(null, "F");
 		while(iterator.hasNext())
 		{	 
 			ResolveInfo ri = (ResolveInfo) iterator.next();

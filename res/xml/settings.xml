@@ -15,7 +15,6 @@
         <Preference
             android:key="@string/help"
             android:title="@string/help" />
-
     </PreferenceCategory>
       <PreferenceCategory android:title="@string/Search_Device" >
         <Preference
@@ -25,14 +24,17 @@
     <PreferenceCategory android:title="@string/changeime" >
         <Preference
             android:key="@string/changeime"
-            android:title="@string/click_to_change"
-            />
+            android:title="@string/click_to_change" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/floatViewS">
+        <CheckBoxPreference
+            android:key="@string/floatViewS"
+            android:title="@string/toogle_to_open" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/quit" >
         <Preference
             android:key="@string/quit"
-            android:title="@string/quit"
-             />
+            android:title="@string/quit" />
     </PreferenceCategory>
 
 </PreferenceScreen>

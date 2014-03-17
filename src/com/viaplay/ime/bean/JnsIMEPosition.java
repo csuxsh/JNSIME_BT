@@ -14,7 +14,7 @@ public class JnsIMEPosition {
 	public float x;
 	public float y;
 	public float r;
-	public float type; 
+	public float type; //ÇøÓòÀàĞÍ£º×óÒ¡¸Ë£¬ÓÒÒ¡¸Ë °´¼ü
 	public int resId;
 	public int color;
 	public int scancode;

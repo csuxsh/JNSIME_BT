@@ -1,15 +1,15 @@
 package com.viaplay.ime;
 
 
+import java.util.Locale;
+
 import com.viaplay.ime.R;
 import com.viaplay.ime.uiadapter.JnsIMEGameListAdapter;
 import com.viaplay.ime.uiadapter.JnsIMEPopAddAdapter;
 import com.viaplay.ime.util.AppHelper;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -24,7 +24,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
@@ -43,43 +42,43 @@ public class JnsIMEGameListActivity extends Activity{
 	private ListView gameList;
 	Dialog adddialog;
 	private  ImageView defautCb[] = new ImageView[4];
-    private  Button defaultD[] = new Button[4];
-    private  Button defaultMap[] = new Button[4];
-	
-	@Override
-	  public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        setContentView(R.layout.activity_game);
-        gameList = (ListView) this.findViewById(R.id.gamelist);
-        Button add = (Button) this.findViewById(R.id.add_game);
-        defautCb[0] = (ImageView) this.findViewById(R.id.dian_c1);
-        defautCb[1] = (ImageView) this.findViewById(R.id.dian_c2);
-        defautCb[2] = (ImageView) this.findViewById(R.id.dian_c3);
-        defautCb[3] = (ImageView) this.findViewById(R.id.dian_c4);
-        defaultD[0] = (Button) this.findViewById(R.id.dian1);
-        defaultD[1] = (Button) this.findViewById(R.id.dian2);
-        defaultD[2] = (Button) this.findViewById(R.id.dian3);
-        defaultD[3] = (Button) this.findViewById(R.id.dian4);
-        defaultMap[0] = (Button) this.findViewById(R.id.default_keymapping1);
-        defaultMap[1] = (Button) this.findViewById(R.id.default_keymapping2);
-        defaultMap[2] = (Button) this.findViewById(R.id.default_keymapping3);
-        defaultMap[3] = (Button) this.findViewById(R.id.default_keymapping4);
+	private  Button defaultD[] = new Button[4];
+	private  Button defaultMap[] = new Button[4];
 
-        showGameList(gameList);
-        chageDefaultCheckBox(JnsIMECoreService.currentDeaultIndex);
-        add.setOnClickListener(ocl);
-        defaultD[0].setOnClickListener(ocl);
-        defaultD[1].setOnClickListener(ocl);
-        defaultD[2].setOnClickListener(ocl);
-        defaultD[3].setOnClickListener(ocl);
-        defaultMap[0].setOnClickListener(ocl);
-        defaultMap[1].setOnClickListener(ocl);
-        defaultMap[2].setOnClickListener(ocl);
-        defaultMap[3].setOnClickListener(ocl);
-        JnsIMECoreService.activitys.add(this);
-    }
-	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		setContentView(R.layout.activity_game);
+		gameList = (ListView) this.findViewById(R.id.gamelist);
+		Button add = (Button) this.findViewById(R.id.add_game);
+		defautCb[0] = (ImageView) this.findViewById(R.id.dian_c1);
+		defautCb[1] = (ImageView) this.findViewById(R.id.dian_c2);
+		defautCb[2] = (ImageView) this.findViewById(R.id.dian_c3);
+		defautCb[3] = (ImageView) this.findViewById(R.id.dian_c4);
+		defaultD[0] = (Button) this.findViewById(R.id.dian1);
+		defaultD[1] = (Button) this.findViewById(R.id.dian2);
+		defaultD[2] = (Button) this.findViewById(R.id.dian3);
+		defaultD[3] = (Button) this.findViewById(R.id.dian4);
+		defaultMap[0] = (Button) this.findViewById(R.id.default_keymapping1);
+		defaultMap[1] = (Button) this.findViewById(R.id.default_keymapping2);
+		defaultMap[2] = (Button) this.findViewById(R.id.default_keymapping3);
+		defaultMap[3] = (Button) this.findViewById(R.id.default_keymapping4);
+
+		showGameList(gameList);
+		chageDefaultCheckBox(JnsIMECoreService.currentDeaultIndex);
+		add.setOnClickListener(ocl);
+		defaultD[0].setOnClickListener(ocl);
+		defaultD[1].setOnClickListener(ocl);
+		defaultD[2].setOnClickListener(ocl);
+		defaultD[3].setOnClickListener(ocl);
+		defaultMap[0].setOnClickListener(ocl);
+		defaultMap[1].setOnClickListener(ocl);
+		defaultMap[2].setOnClickListener(ocl);
+		defaultMap[3].setOnClickListener(ocl);
+		JnsIMECoreService.activitys.add(this);
+	}
+
 	private void chageDefaultCheckBox(int index)
 	{
 		defautCb[0].setVisibility(View.GONE);
@@ -93,8 +92,8 @@ public class JnsIMEGameListActivity extends Activity{
 		if(JnsIMECoreService.aph== null)
 			JnsIMECoreService.aph = new AppHelper(this);
 		AppHelper aph = JnsIMECoreService.aph;
-		Cursor cursor = aph.Qurey(null);
-	    gameAdapter = new JnsIMEGameListAdapter(cursor, this);
+		Cursor cursor = aph.Qurey(null,"F");
+		gameAdapter = new JnsIMEGameListAdapter(cursor, this);
 		lv.setAdapter(gameAdapter);
 		lv.setOnItemClickListener(new OnItemClickListener()
 		{
@@ -107,29 +106,40 @@ public class JnsIMEGameListActivity extends Activity{
 				Cursor cursor =  (Cursor) listView.getItemAtPosition(arg2); 
 				PackageManager pm = JnsIMEGameListActivity.this.getPackageManager();
 				try{
-					final Intent in = new Intent(pm.getLaunchIntentForPackage(cursor.getString(cursor.getColumnIndex("_name"))));
-					String hidonly = cursor.getString(cursor.getColumnIndex("_hidonly"));
-					if(hidonly !=null && hidonly.equals("true"))
-					{
-						(new AlertDialog.Builder(JnsIMEGameListActivity.this).setMessage(getString(R.string.hid_only) ).setPositiveButton("sure",
-								new DialogInterface.OnClickListener()
-						{
-
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								// TODO Auto-generated method stub
-								JnsIMEGameListActivity.this.startActivity(in);
-							}
-							
-						}).setNegativeButton("cancle", null).create()).show();
-					}
-					else
-						JnsIMEGameListActivity.this.startActivity(in);
+					Intent in = new Intent(pm.getLaunchIntentForPackage(cursor.getString(cursor.getColumnIndex("_name"))));
+					JnsIMEGameListActivity.this.startActivity(in);
 				}
 				catch(Exception e)
 				{
-					Uri uri = Uri.parse("market://details?id="+cursor.getString(cursor.getColumnIndex("_name")));  
+					Uri uri = null;
+					if(Locale.getDefault().getLanguage().startsWith("zh"))
+					{	
+						if(cursor.getString(cursor.getColumnIndex("_url")) != null ||
+								!cursor.getString(cursor.getColumnIndex("_url")).equals(""))
+							uri = Uri.parse(cursor.getString(cursor.getColumnIndex("_url")));
+						else
+							Uri.parse("market://details?id="+cursor.getString(cursor.getColumnIndex("_name")));  
+					}
+					else
+					{	
+						uri = Uri.parse("https://play.google.com/store/apps/details?id="+cursor.getString(cursor.getColumnIndex("_name")));  
+						if(cursor.getString(cursor.getColumnIndex("_name")).equals("com.androidemu.n64"))
+							uri = Uri.parse("http://slideme.org/application/n64oid");
+						else if(cursor.getString(cursor.getColumnIndex("_name")).equals("fr.mydedibox.afba"))
+							uri = Uri.parse("http://forum.xda-developers.com/showthread.php?t=1932280");
+						else if(cursor.getString(cursor.getColumnIndex("_name")).equals("com.joyemu.fbaapp"))
+							uri = Uri.parse("http://hi.baidu.com/tofro/item/c1dde9d837b2214efb5768c3");
+						else if(cursor.getString(cursor.getColumnIndex("_name")).equals("com.kawaks"))
+							uri = Uri.parse("http://www.kawaks.net/");
+						else if(cursor.getString(cursor.getColumnIndex("_name")).equals("com.eamobile.tetris_eu"))
+							uri = Uri.parse("http://www.1mobile.com/com-ea-tetrisfree-na-350822.html");
+						else if(cursor.getString(cursor.getColumnIndex("_name")).equals("com.bistudio.at"))
+							uri = Uri.parse("http://samsungapps.sina.cn/topApps/topAppsDetail.as?productId=000000684336");
+						else if(cursor.getString(cursor.getColumnIndex("_name")).equals("com.tiger.game.arcade2"))
+							uri = Uri.parse("http://slideme.org/application/tiger-arcade");
+						else if(cursor.getString(cursor.getColumnIndex("_name")).equals("com.retrobomb.expendablerearmed"))
+							uri = Uri.parse("http://android.mob.org/download/a3303.html");
+					}
 					Intent it = new Intent(Intent.ACTION_VIEW, uri);   
 					JnsIMEGameListActivity.this.startActivity(it);   
 				}
@@ -164,7 +174,7 @@ public class JnsIMEGameListActivity extends Activity{
 						aph.Insert(rinfo.activityInfo.packageName, "true");
 					}
 				}
-				Cursor cursor = aph.Qurey(null);
+				Cursor cursor = aph.Qurey(null, "F");
 				gameAdapter.setCursor(cursor);
 				gameAdapter.notifyDataSetChanged();
 				adddialog.dismiss();
@@ -257,9 +267,8 @@ public class JnsIMEGameListActivity extends Activity{
 		if(JnsIMECoreService.aph== null)
 			JnsIMECoreService.aph = new AppHelper(this);
 		AppHelper aph = JnsIMECoreService.aph;
-		Cursor cursor = aph.Qurey(null);
+		Cursor cursor = aph.Qurey(null, "F");
 		gameAdapter.setCursor(cursor);
 		gameAdapter.notifyDataSetChanged();
 	}
-
 }

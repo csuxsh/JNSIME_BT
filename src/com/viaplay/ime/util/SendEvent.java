@@ -19,8 +19,8 @@ import com.viaplay.ime.bean.JnsIMEProfile;
 import com.viaplay.ime.jni.JoyStickEvent;
 import com.viaplay.ime.jni.RawEvent;
 /**
- * ÓëÊäÈë·¨Á¬½Ó ÒÔ¼° jnsinput.jarÍ¨ĞÅµÄÀà
- * <p>ÕâÊÇÒ»¸öµ¥ÁĞÀà£¬Ö»ÄÜÍ¨¹ı{@link getSendEvent}getSendEvent»ñµÃ¶ÔÏó£¬ËùÓĞ²Ù¿ØÆ÷ĞèÒª×ª»»µÄÊı¾İ¾ùÓÉ´ËÀà·¢³ö¡£
+ * æ¶“åº¤ç·­éãƒ¦ç¡¶æ©ç‚´å¸´ æµ ãƒ¥å¼· jnsinput.jaré–«æ°«ä¿Šé¨å‹­è¢«
+ * <p>æ©æ¬æ§¸æ¶“ï¿½é‡œé—æ›åªç»«ä¼™ç´é™î‡å…˜é–«æ°³ç¹ƒ{@link getSendEvent}getSendEventé‘¾å³°ç·±ç€µç¡…è–„é”›å±¾å¢éˆå¤‹æ·éºÑƒæ«’é—‡ï¿½îœ…æî„å´²é¨å‹¬æšŸé¹î†¼æ½é¢è¾¨î„ç»«è¯²å½‚é‘æ’ï¿½
  * 
  * @author steven
  *
@@ -29,109 +29,109 @@ public class SendEvent {
 
 	public final static String pkgName ="com.viaplay.ime";
 	public final static String TAG= "SendEvent";
-
-	private final static int  STICK_MOVE_IRQ_TIME = 5;
+	
+	private final static int  STICK_MOVE_IRQ_TIME = 1;
 	/**
-	 * ·¢ËÍµ½jnsinput´¥ÃşÏûÏ¢µÄ±êÊ¾Í·
+	 * é™æˆ¦ï¿½é’ç™¹nsinputç‘™ï¸½æ‡œå¨‘å Ÿä¼…é¨å‹¬çˆ£ç»€å“„ã”
 	 */
 	private final static String TOUCH = "injectTouch";
 	/**
-	 * ·¢ËÍµ½jnsinput°´¼üÏûÏ¢µÄ±êÊ¾Í·
+	 * é™æˆ¦ï¿½é’ç™¹nsinputé¸å¤æ•­å¨‘å Ÿä¼…é¨å‹¬çˆ£ç»€å“„ã”
 	 */
 	private final static String KEY = "injectKey";
 	/**
-	 * ·¢ËÍµ½jnsinputÏûÏ¢µÄ½âÎö·Ö¸ô·û
+	 * é™æˆ¦ï¿½é’ç™¹nsinputå¨‘å Ÿä¼…é¨å‹®Ğ’é‹æ„¬åé—…æ—‚îƒ
 	 */
 	private final static String TOKEN=  ":";
 	/**
-	 * Á¬½Óµ½jnsinputµÃsocket¶ÔÏó
+	 * æ©ç‚´å¸´é’ç™¹nsinputå¯°æ¢¥ocketç€µç¡…è–„
 	 */
 	private static Socket socket;
 	private static PrintWriter pw;
 	private static DataInputStream dis;
 
 	/**
-	 * ÓÒÒ¡¸Ë°´ÏÂ±ê¼Ç
+	 * é™è™«æ†é‰å—˜å¯œæ¶“å¬«çˆ£ç’ï¿½
 	 */
 	private boolean rightMotionKey = false;
 	/**
-	 * ×óÒ¡¸Ë°´ÏÂ±ê¼Ç
+	 * å®¸ï¸½æ†é‰å—˜å¯œæ¶“å¬«çˆ£ç’ï¿½
 	 */
 	private boolean leftMotionKey = false;
 	/**
-	 * ÓÒÒ¡¸ËÒÆ¶¯µÄºá×ø±ê
+	 * é™è™«æ†é‰å—™Ğ©é”ã„§æ®‘å¦¯î„æ½—éï¿½
 	 */
 	private float rightJoystickCurrentPosX = 0.0f;
 	/**
-	 * ÓÒÒ¡¸ËÒÆ¶¯µÄ×İ×ø±ê
+	 * é™è™«æ†é‰å—™Ğ©é”ã„§æ®‘ç»¾é›æ½—éï¿½
 	 */
 	private float rightJoystickCurrentPosY = 0.0f;
 	/**
-	 * ×óÒ¡¸ËÒÆ¶¯µÄºá×ø±ê
+	 * å®¸ï¸½æ†é‰å—™Ğ©é”ã„§æ®‘å¦¯î„æ½—éï¿½
 	 */
 	private float leftJoystickCurrentPosX = 0.0f;
 	/**
-	 * ×óÒ¡¸ËÒÆ¶¯µÄ×İ×ø±ê
+	 * å®¸ï¸½æ†é‰å—™Ğ©é”ã„§æ®‘ç»¾é›æ½—éï¿½
 	 */
 	private float leftJoystickCurrentPosY = 0.0f;
 	/**
-	 * Ò¡¸ËÒÆ¶¯µÄºá×ø±ê
+	 * é½å›¨æ½Œç»‰è¯²å§©é¨å‹¬Ã­é§æ„­çˆ£
 	 */
 	private float joystickR = 0.0f;
 	/**
-	 * ÓÒÒ¡¸Ëµ±Ç°ÅäÖÃµÄ°ë¾¶
+	 * é™è™«æ†é‰å——ç¶‹é“å¶‰å¤ç¼ƒî†¾æ®‘é—å©‚ç·
 	 */
 	private float rightJoystickCurrentR = 0.0f;
 	/**
-	 * ×óÒ¡¸Ëµ±Ç°ÅäÖÃµÄ°ë¾¶
+	 * å®¸ï¸½æ†é‰å——ç¶‹é“å¶‰å¤ç¼ƒî†¾æ®‘é—å©‚ç·
 	 */
 	private float leftJoystickCurrentR = 0.0f;
 	/**
-	 * ×óÒ¡¸Ëµ±Ç°ÊÇ·ñ°´ÏÂ
+	 * å®¸ï¸½æ†é‰å——ç¶‹é“å¶†æ§¸éšï¸½å¯œæ¶“ï¿½
 	 */
 	private boolean LeftJoystickPresed = false;
 	/**
-	 * ÓÒÒ¡¸Ëµ±Ç°ÊÇ·ñ°´ÏÂ
+	 * é™è™«æ†é‰å——ç¶‹é“å¶†æ§¸éšï¸½å¯œæ¶“ï¿½
 	 */
 	private boolean RightJoystickPresed = false;
 	/**
-	 * ÉÏ´Î´¦Àí×óÒ¡¸ËÊÂ¼şµÄÊ±¼ä
+	 * æ¶“å©ƒî‚¼æ¾¶å‹­æ‚Šå®¸ï¸½æ†é‰å—•ç°¨æµ å‰æ®‘éƒå •æ£¿
 	 */
 	private long last_left_press_time = 0;
 	/**
-	 * ÉÏ´Î´¦ÀíÓÒÒ¡¸ËÊÂ¼şµÄÊ±¼ä
+	 * æ¶“å©ƒî‚¼æ¾¶å‹­æ‚Šé™è™«æ†é‰å—•ç°¨æµ å‰æ®‘éƒå •æ£¿
 	 */
 	private long last_right_press_time = 0;
 	/**
-	 * ÅĞ¶Ï×óÒ¡¸Ëµ±Ç°ÊÇ·ñ´¦ÔÚ×óÒÆ×´Ì¬
+	 * é’ã‚†æŸ‡å®¸ï¸½æ†é‰å——ç¶‹é“å¶†æ§¸éšï¹€î˜µé¦ã„¥ä¹ç»‰è¤å§¸é¬ï¿½
 	 */
 	private boolean joy_xi_pressed = false;
 	/**
-	 * ÅĞ¶Ï×óÒ¡¸Ëµ±Ç°ÊÇ·ñ´¦ÔÚÓÒÒÆ×´Ì¬
+	 * é’ã‚†æŸ‡å®¸ï¸½æ†é‰å——ç¶‹é“å¶†æ§¸éšï¹€î˜µé¦ã„¥å½¸ç»‰è¤å§¸é¬ï¿½
 	 */
 	private boolean joy_xp_pressed =false;
 	/**
-	 * ÅĞ¶Ï×óÒ¡¸Ëµ±Ç°ÊÇ·ñ´¦ÔÚÏÂÒÆ×´Ì¬
+	 * é’ã‚†æŸ‡å®¸ï¸½æ†é‰å——ç¶‹é“å¶†æ§¸éšï¹€î˜µé¦ã„¤ç¬…ç»‰è¤å§¸é¬ï¿½
 	 */
 	private boolean joy_yi_pressed = false;
 	/**
-	 * ÅĞ¶Ï×óÒ¡¸Ëµ±Ç°ÊÇ·ñ´¦ÔÚÉÏÒÆ×´Ì¬
+	 * é’ã‚†æŸ‡å®¸ï¸½æ†é‰å——ç¶‹é“å¶†æ§¸éšï¹€î˜µé¦ã„¤ç¬‚ç»‰è¤å§¸é¬ï¿½
 	 */
 	private boolean joy_yp_pressed =false;
 	/**
-	 * ÅĞ¶Ï×óÓÒÒ¡¸Ëµ±Ç°ÊÇ·ñ´¦ÔÚ×óÒÆ×´Ì¬
+	 * é’ã‚†æŸ‡å®¸ï¹€å½¸é½å›¨æ½Œè¤°æ’³å¢ é„îˆšæƒæ¾¶å‹«æ¹ªå®¸ï¸¾Ğ©é˜èˆµï¿½
 	 */
 	private boolean joy_zi_pressed = false;
 	/**
-	 * ÅĞ¶Ï×óÓÒÒ¡¸Ëµ±Ç°ÊÇ·ñ´¦ÔÚÓÒÒÆ×´Ì¬
+	 * é’ã‚†æŸ‡å®¸ï¹€å½¸é½å›¨æ½Œè¤°æ’³å¢ é„îˆšæƒæ¾¶å‹«æ¹ªé™å´‡Ğ©é˜èˆµï¿½
 	 */
 	private boolean joy_zp_pressed =false;
 	/**
-	 * ÅĞ¶Ï×óÓÒÒ¡¸Ëµ±Ç°ÊÇ·ñ´¦ÔÚÏÂÒÆ×´Ì¬
+	 * é’ã‚†æŸ‡å®¸ï¹€å½¸é½å›¨æ½Œè¤°æ’³å¢ é„îˆšæƒæ¾¶å‹«æ¹ªæ¶“å¬¬Ğ©é˜èˆµï¿½
 	 */
 	private boolean joy_rzi_pressed = false;
 	/**
-	 * ÅĞ¶Ï×óÓÒÒ¡¸Ëµ±Ç°ÊÇ·ñ´¦ÔÚÉÏÒÆ×´Ì¬
+	 * é’ã‚†æŸ‡å®¸ï¹€å½¸é½å›¨æ½Œè¤°æ’³å¢ é„îˆšæƒæ¾¶å‹«æ¹ªæ¶“å©„Ğ©é˜èˆµï¿½
 	 */
 	private boolean joy_rzp_pressed =false;
 
@@ -144,7 +144,7 @@ public class SendEvent {
 	}
 
 	/**
-	 * »ñµÃÒ»¸öSendEvent¶ÔÏó
+	 * é‘¾å³°ç·±æ¶“ï¿½é‡œSendEventç€µç¡…è–„
 	 **/
 	public static SendEvent getSendEvent()
 	{
@@ -153,9 +153,9 @@ public class SendEvent {
 		return sendEvent;
 	}
 	/**
-	 * Æô¶¯socketÁ¬½Óµ½jnsinput.jar 
+	 * éšîˆšå§©socketæ©ç‚´å¸´é’ç™¹nsinput.jar 
 	 * 
-	 *  @return Á¬½Ó³É¹¦·µ»Øtrue,·ñÔò·µ»Øfalse
+	 *  @return æ©ç‚´å¸´é´æ„¬å§›æ©æ–¿æ´–true,éšï¹€å¯æ©æ–¿æ´–false
 	 */
 	public  boolean connectJNSInputServer() {
 
@@ -174,7 +174,7 @@ public class SendEvent {
 			catch(Exception e)
 			{	
 				//	e.printStackTrace();
-				//	JnsEnvInit.startJnsInputServier();
+					JnsEnvInit.startJnsInputServier();
 				connect = false;
 				try {
 					Thread.sleep(3000);
@@ -191,19 +191,19 @@ public class SendEvent {
 
 
 	/**
-	 * ²éÕÒscancodeÊÇ·ñÒÑ´æÔÚÓÚkeylistÖĞ 
+	 * éŒãƒ¦å£˜scancodeé„îˆšæƒå®¸æ’ç“¨é¦ã„¤ç°¬keylistæ¶“ï¿½
 	 * 
 	 * @author Steven.xu
 	 * 
-	 * @param keylist ĞèÒª²éÕÒµÄkeylist¶ÔÏó
-	 * @param scancode Ö¸¶¨µÄÉ¨ÃèÂë
+	 * @param keylist é—‡ï¿½îœ…éŒãƒ¦å£˜é¨åˆ±eylistç€µç¡…è–„
+	 * @param scancode é¸å›§ç•¾é¨å‹¬å£‚é»å¿•çˆœ
 	 * 
-	 * @return Á¬½Ó³É¹¦·µ»Øtrue,·ñÔò·µ»Øfalse
+	 * @return æ©ç‚´å¸´é´æ„¬å§›æ©æ–¿æ´–true,éšï¹€å¯æ©æ–¿æ´–false
 	 */
 	@SuppressWarnings("unused")
 	private static JnsIMEProfile iteratorKeyList(List<JnsIMEProfile> keylist, int scancode)
 	{
-		Log.d(TAG, "list size"+keylist.size());
+		//Log.d(TAG, "list size"+keylist.size());
 		if(keylist==null)
 			return null;
 		for(JnsIMEProfile keyProfile : keylist)
@@ -212,11 +212,11 @@ public class SendEvent {
 		return null;
 	}
 	/**
-	 * ¼ì²éÒÑ·¢³öµÄÊÂ¼şÊÇ·ñÒÑ¾­ËÉ¿ª
+	 * å¦«ï¿½ç…¡å®¸æ’å½‚é‘è™¹æ®‘æµœå¬©æ¬¢é„îˆšæƒå®¸èŒ¬ç²¡é‰æƒ§ç´‘
 	 * 
 	 * @author Steven.xu
 	 * 
-	 * @return ÒÑËÉ¿ª·µ»Øtrue, ·ñÔò·µ»Øfalse
+	 * @return å®¸å‰æ¾—å¯®ï¿½ç¹‘é¥ç€Ÿrue, éšï¹€å¯æ©æ–¿æ´–false
 	 */
 	public boolean getEventDownLock() throws Exception
 	{
@@ -237,27 +237,27 @@ public class SendEvent {
 
 	}
 	/**
-	 * ×¢Èë²Ù¿ØÆ÷µÄkeyeventÊÂ¼ş
+	 * å¨‰ã„¥å†é¿å¶†å¸¶é£ã„§æ®‘keyeventæµœå¬©æ¬¢
 	 * 
-	 * Èç¹û¸Ã°´¼üÒÑ¾­ÅäÖÃµÄ´¥Ãş°´¼ü£¬ÔòºöÂÔkeymapingµÄÅäÖÃ£¬Ö±½Ó½«°´¼ü·¢ËÍÖÁjnsinput.jar,×¢ÈëtouchÊÂ¼ş£¬
-	 * Èç¹ûÃ»ÓĞÅäÖÃ´¥Ãş°´¼ü£¬ÅäÖÃÁËkeymmaping,Ôòµ÷ÓÃÊäÈë·¨Á¬½ÓµÄsendKeyEent½«keyEvent×¢Èëµ½¶ÔÓ¦µÄÓ¦ÓÃ£¬
-	 * Èç¹û¾ùÎ´ÅäÖÃÔòºöÂÔ
+	 * æ¿¡å‚›ç‰ç’‡ãƒ¦å¯œé–¿î†¼å‡¡ç¼å¿›å¤ç¼ƒî†¾æ®‘ç‘™ï¸½æ‡œé¸å¤æ•­é”›å±½å¯è¹‡ç•Œæškeymapingé¨å‹¯å¤ç¼ƒî‡†ç´é©å­˜å¸´çå—˜å¯œé–¿î†¼å½‚é–«ä½½åš¦jnsinput.jar,å¨‰ã„¥å†touchæµœå¬©æ¬¢é”›ï¿½
+	 * æ¿¡å‚›ç‰å¨Œâ„ƒæ¹é–°å¶‡ç–†ç‘™ï¸½æ‡œé¸å¤æ•­é”›å²„å¤ç¼ƒî†»ç°¡keymmaping,é’æ¬’çšŸé¢ã„¨ç·­éãƒ¦ç¡¶æ©ç‚´å¸´é¨å‰†endKeyEentçå”ŠeyEventå¨‰ã„¥å†é’æ¿î‡®æ´æ—‚æ®‘æ´æ—‚æ•¤é”›ï¿½
+	 * æ¿¡å‚›ç‰é§å›¨æ¹­é–°å¶‡ç–†é’æ¬æ‹·é£ï¿½
 	 * 
 	 * @author Steven.xu
 	 * 
-	 * @param keyevent Òª·¢ËÍµÄkeyevent¶ÔÏó
+	 * @param keyevent ç‘•ä½¸å½‚é–«ä½ºæ®‘keyeventç€µç¡…è–„
 	 * 
-	 * @return ·¢ËÍ³É¹¦·µ»Øtrue,Ê§°Ü·µ»Øfalse
+	 * @return é™æˆ¦ï¿½é´æ„¬å§›æ©æ–¿æ´–true,æ¾¶è¾«è§¦æ©æ–¿æ´–false
 	 */
 	public  boolean sendKey(RawEvent keyevent)
 	{ 
-		if(JnsIMECoreService.touchConfiging)
-			return true;
-		Log.d(TAG,"scancode="+keyevent.scanCode);
+		//if(JnsIMECoreService.touchConfiging)
+		//	return true;
+		//Log.d(TAG,"scancode="+keyevent.scanCode);
 		JnsIMEProfile keyProfile =  iteratorKeyList(JnsIMECoreService.keyList, keyevent.scanCode);
 		if(null == keyProfile)
 		{	
-			Log.d(TAG, "keyprofile  is  null");
+			//Log.d(TAG, "keyprofile  is  null");
 			if(!JnsIMECoreService.keyMap.containsKey(keyevent.scanCode))
 			{	
 				keyevent.keyCode = JoyStickTypeF.typeFKeyMap.get(keyevent.scanCode);
@@ -275,14 +275,14 @@ public class SendEvent {
 				//
 			}
 		}
-		Log.d(TAG, "keyprofile  is not null");
+		//Log.d(TAG, "keyprofile  is not null");
 
 		try{
 			//	socket.getOutputStream().write(posString((int)keyProfile.posX, (int)keyProfile.posY, keyevent.value).getBytes());
 			sendToJar(posString((int)keyProfile.posX, (int)keyProfile.posY, keyevent.value));
 
-			Log.d(TAG,"send pos x="+keyProfile.posX+", pos y = "+keyProfile.posY+"action = "+keyevent.value);
-			Log.d(TAG, "current time is "+System.currentTimeMillis());
+			//Log.d(TAG,"send pos x="+keyProfile.posX+", pos y = "+keyProfile.posY+"action = "+keyevent.value);
+			//Log.d(TAG, "current time is "+System.currentTimeMillis());
 		}
 		catch(Exception e)
 		{
@@ -292,13 +292,13 @@ public class SendEvent {
 		return true;
 	}
 	/**
-	 * ×¢Èë²Ù¿ØÆ÷µÄÒ¡¸ËÊÂ¼ş
+	 * å¨‰ã„¥å†é¿å¶†å¸¶é£ã„§æ®‘é½å›¨æ½Œæµœå¬©æ¬¢
 	 * 
 	 * @author Steven.xu
 	 * 
-	 * @param joyevent Òª·¢ËÍµÄjoyevent¶ÔÏó
+	 * @param joyevent ç‘•ä½¸å½‚é–«ä½ºæ®‘joyeventç€µç¡…è–„
 	 * 
-	 * @return ·¢ËÍ³É¹¦·µ»Øtrue,Ê§°Ü·µ»Øfalse
+	 * @return é™æˆ¦ï¿½é´æ„¬å§›æ©æ–¿æ´–true,æ¾¶è¾«è§¦æ©æ–¿æ´–false
 	 */
 	public void sendJoy(JoyStickEvent joyevent)
 	{
@@ -333,14 +333,14 @@ public class SendEvent {
 	}
 
 	/**
-	 * ¼ÆËãÒ¡¸ËÆ«ÒÆµÄÕıÏÒÖµ
+	 * ç’ï¼„ç•»é½å›¨æ½Œé‹å¿•Ğ©é¨å‹¬î„œå¯®ï¹€ï¿½
 	 * 
 	 * @author Steven.xu
 	 * 
-	 * @param bx ²Ù¿Ø×ÅÒ¡¸ËµÄºáÏò±ãÒËÁ¿£¬-127 ~ 127
-	 * @param by ²Ù¿ØÆ÷Ò¡¸ËµÄ×İÏòÆ«ÒÆÁ¿ ¡£-127 ~ 127
-	 * @param joystickType Ò¡¸ËµÄÀàĞÍ TYPE_LEFT_JOYSTICK »òÕß TYPE_RIGHT_JOYSTICK
-	 * @return Ò¡¸ËÆ«ÒÆµÄÕıÏÒÖµ
+	 * @param bx é¿å¶†å¸¶é«ï¿½æ†é‰å—™æ®‘å¦¯î„æ‚œæ¸šå®ç–é–²å¿¥ç´-127 ~ 127
+	 * @param by é¿å¶†å¸¶é£ã„¦æ†é‰å—™æ®‘ç»¾é›æ‚œé‹å¿•Ğ©é–²ï¿½éŠ†ï¿½127 ~ 127
+	 * @param joystickType é½å›¨æ½Œé¨å‹­è¢«é¨ï¿½TYPE_LEFT_JOYSTICK é´æ ¬ï¿½ TYPE_RIGHT_JOYSTICK
+	 * @return é½å›¨æ½Œé‹å¿•Ğ©é¨å‹¬î„œå¯®ï¹€ï¿½
 	 */
 	private double calcSinA(int bx, int by, int joystickType) {
 		int ox = 0x7f;
@@ -359,15 +359,15 @@ public class SendEvent {
 	}
 
 	/**
-	 * ´¦Àí²Ù¿ØÆ÷ÓÒÒ¡¸ËµÄÊı¾İ£¬
+	 * æ¾¶å‹­æ‚Šé¿å¶†å¸¶é£ã„¥å½¸é½å›¨æ½Œé¨å‹¬æšŸé¹î‡†ç´
 	 * 
-	 * <p>´¦ÀíÍê³Éºó»á¸ú¸ù¾İÅäÖÃÎÄ¼şÖ±½Ó·¢ËÍµ½jnsinput»òÕßÊÇ×¢Èëµ½Ó¦ÓÃ
+	 * <p>æ¾¶å‹­æ‚Šç€¹å±¾åšéšåºç´°ç’ºç†¸ç‰´é¹î‡€å¤ç¼ƒî†½æƒæµ å‰æ´¿éºãƒ¥å½‚é–«ä½¸åŸŒjnsinputé´æ ¬ï¿½é„îˆ›æ•éãƒ¥åŸŒæ´æ—‚æ•¤
 	 * 
 	 * @author Steven.xu
 	 * 
-	 * @param i ²Ù¿Ø×ÅÒ¡¸ËµÄºáÏò±ãÒËÁ¿£¬-127 ~ 127
-	 * @param j ²Ù¿ØÆ÷Ò¡¸ËµÄ×İÏòÆ«ÒÆÁ¿ ¡£-127 ~ 127
-	 * @param deviceId ²Ù¿ØÆ÷ÔÚdeviceÖĞµÄid,³ÌĞòÖĞÃ»ÓĞÈ¥»ñÈ¡¿ÉÒÔÖ±½ÓÊä0
+	 * @param i é¿å¶†å¸¶é«ï¿½æ†é‰å—™æ®‘å¦¯î„æ‚œæ¸šå®ç–é–²å¿¥ç´-127 ~ 127
+	 * @param j é¿å¶†å¸¶é£ã„¦æ†é‰å—™æ®‘ç»¾é›æ‚œé‹å¿•Ğ©é–²ï¿½éŠ†ï¿½127 ~ 127
+	 * @param deviceId é¿å¶†å¸¶é£ã„¥æ¹ªdeviceæ¶“î… æ®‘id,ç»‹å¬ªç°­æ¶“î…Ÿç—…éˆå¤Šå¹“é‘¾å³°å½‡é™îˆ™äº’é©å­˜å¸´æˆï¿½
 	 */
 	private void processRightJoystickData(int i, int j, int deviceId) { // x = buffer[3] y = buffer[4]
 		int ox = 0x7f;
@@ -393,48 +393,48 @@ public class SendEvent {
 					double x = Math.sqrt(Math.pow(touchR1, 2) - Math.pow(y, 2));
 					float rawX = 0.0f;
 					float rawY = 0.0f;
-					if (ux < ox && uy < oy) {  //åæ ‡è½´ä¸ŠåŠéƒ¨çš„å·¦
+					if (ux < ox && uy < oy) {  //é–¸Ñ„åŠ–é–ï½†æ½ªç¼ˆçŠµç‘é–¸æ¥€ï¹ªéæ’®æƒƒé•î‚¡ç®¯
 						rawX = bp.posX - (float)x;
 						rawY = bp.posY - (float)y;
 						rightMotionKey = true;
 						//	Log.e(TAG, "axis positive left part");
-					} else if (ux > ox && uy < oy) {  //åæ ‡è½´ä¸ŠåŠéƒ¨çš„å³
+					} else if (ux > ox && uy < oy) {  //é–¸Ñ„åŠ–é–ï½†æ½ªç¼ˆçŠµç‘é–¸æ¥€ï¹ªéæ’®æƒƒé•î‚¢ç¤
 						rawX = bp.posX + (float) x;
 						rawY = bp.posY - (float) y;
 						rightMotionKey = true;
 						//	Log.e(TAG, "axis positive right part");
-					} else if (ux < ox && uy > oy) { //åæ ‡è½´ä¸‹åŠéƒ¨çš„å·¦
+					} else if (ux < ox && uy > oy) { //é–¸Ñ„åŠ–é–ï½†æ½ªç¼ˆçŠµç‘“é–¸æ¥€ï¹ªéæ’®æƒƒé•î‚¡ç®¯
 						rawX = bp.posX  - (float) x;
 						rawY = bp.posY + (float) y;
 						rightMotionKey = true;
 						//	Log.e(TAG, "axis negtive left part");
-					} else if (ux > ox && uy > oy) { //åæ ‡è½´ä¸‹åŠéƒ¨çš„å³
+					} else if (ux > ox && uy > oy) { //é–¸Ñ„åŠ–é–ï½†æ½ªç¼ˆçŠµç‘“é–¸æ¥€ï¹ªéæ’®æƒƒé•î‚¢ç¤
 						rawX = bp.posX + (float) x;
 						rawY = bp.posY + (float) y;
 						rightMotionKey = true;
 						//	Log.e(TAG, "axis negtiveleft part");
-					} else if (ux == ox && uy < oy) { //Yè½´å˜åŒ?
+					} else if (ux == ox && uy < oy) { //Yé‰ç‚´æ½™è¤°å¤å´ ?
 						rawX = bp.posX;
 						rawY = bp.posY - (float)y;
 						rightMotionKey = true;
 						//	Log.e(TAG, "axis Y < 0x7f");
-					} else if (ux == ox && uy > oy) { //Yè½´å˜åŒ?
+					} else if (ux == ox && uy > oy) { //Yé‰ç‚´æ½™è¤°å¤å´ ?
 						rawX = bp.posX;
 						rawY = bp.posY + (float) y;
 						rightMotionKey = true;
 						//	Log.e(TAG, "axis Y > 0x7f");
-					} else if (ux < ox && uy == oy) { //Xè½´å˜åŒ?
+					} else if (ux < ox && uy == oy) { //Xé‰ç‚´æ½™è¤°å¤å´ ?
 						rawX = bp.posX - (float)x;
 						rawY = bp.posY;
 						rightMotionKey = true;
-						Log.e(TAG, "axis X < 0x7f");
-					} else if (ux > ox && uy == oy) { //Xè½´å˜åŒ?
+						//Log.e(TAG, "axis X < 0x7f");
+					} else if (ux > ox && uy == oy) { //XçŒ«é™†éº“æ°“è«è—´æ°“è‰—?
 						rawX = bp.posX + (float) x;
 						rawY = bp.posY;
 						rightMotionKey = true;
-						Log.e(TAG, "axis X  > 0x7f");
+						//Log.e(TAG, "axis X  > 0x7f");
 					} else if (ux == ox && uy == oy && rightMotionKey) {
-						Log.e(TAG, "right  you release map");
+						//Log.e(TAG, "right  you release map");
 						sendToJar(posString(bp.posX, bp.posY, JoyStickTypeF.RIGHT_JOYSTICK_TAG, MotionEvent.ACTION_MOVE));
 
 						sendToJar(posString(bp.posX, bp.posY, JoyStickTypeF.RIGHT_JOYSTICK_TAG, MotionEvent.ACTION_UP));
@@ -452,7 +452,7 @@ public class SendEvent {
 
 						if(RightJoystickPresed)
 						{
-							if((rawX != rightJoystickCurrentPosX) && (rawY != rightJoystickCurrentPosY))
+							if((rawX != rightJoystickCurrentPosX) || (rawY != rightJoystickCurrentPosY))
 								if(System.currentTimeMillis() - last_right_press_time > STICK_MOVE_IRQ_TIME)
 								{		
 									sendToJar(posString(rawX, rawY, JoyStickTypeF.RIGHT_JOYSTICK_TAG, MotionEvent.ACTION_MOVE));
@@ -466,25 +466,22 @@ public class SendEvent {
 				}
 			}
 		}
-		Log.d(TAG,"z="+ux+", rz="+uy);
+		//Log.d(TAG,"z="+ux+", rz="+uy);
 		if(!touchMapped)
 		{
 			int z = ux;
 			int rz = uy;
 			RawEvent keyevent;
 
-			if(z > 200 )
+			if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_ZP_SCANCODE))
 			{
-				if(!joy_zp_pressed)
+				if(z > 200 )
 				{
-					joy_zp_pressed = true;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_ZP_SCANCODE))
-
+					if(!joy_zp_pressed)
+					{
+						joy_zp_pressed = true;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZP_SCANCODE),
 								JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_ZP_SCANCODE),
-								JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);	
 					sendToJar(keyevent);
 
 				}
@@ -494,30 +491,22 @@ public class SendEvent {
 				if(joy_zp_pressed)
 				{
 					joy_zp_pressed = false;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_ZP_SCANCODE))
-
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZP_SCANCODE),
 								JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_UP,deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_ZP_SCANCODE),
-								JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_UP, deviceId);	
 					sendToJar(keyevent);
-
+					}
 				}
 			}
 
-			if(z < 50)
+			if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_ZI_SCANCODE))
 			{
-				if(!joy_zi_pressed)
+				if(z < 50)
 				{
-					joy_zi_pressed = true;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_ZI_SCANCODE))
-
+					if(!joy_zi_pressed)
+					{
+						joy_zi_pressed = true;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZI_SCANCODE),
 								JoyStickTypeF.BUTTON_ZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_ZI_SCANCODE),
-								JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);		
 					sendToJar(keyevent);
 
 				}
@@ -527,32 +516,24 @@ public class SendEvent {
 				if(joy_zi_pressed)
 				{
 					joy_zi_pressed = false;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_ZI_SCANCODE))
-
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZI_SCANCODE),
 								JoyStickTypeF.BUTTON_ZI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_ZI_SCANCODE),
-								JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_UP, deviceId);			
 					sendToJar(keyevent);
 
 				}
 			}
 
-			if(rz > 200)
-			{
-
-				if(!joy_rzi_pressed)
+			if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZI_SCANCODE))
+			{				
+				if(rz > 200)
 				{
 
-					joy_rzi_pressed = true;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZI_SCANCODE))
+					if(!joy_rzi_pressed)
+					{
 
+						joy_rzi_pressed = true;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZI_SCANCODE),
 								JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_RZI_SCANCODE),
-								JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);	
 					sendToJar(keyevent);
 
 				}
@@ -562,32 +543,24 @@ public class SendEvent {
 				if(joy_rzi_pressed)
 				{
 
-					joy_rzi_pressed = false;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZI_SCANCODE))
-
+						joy_rzi_pressed = false;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZI_SCANCODE),
 								JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_RZI_SCANCODE),
-								JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_UP, deviceId);		
 					sendToJar(keyevent);
-
+					}
 				}
+
 			}
 
-
-			if(rz < 50)
+			if( JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZP_SCANCODE))
 			{
-				if(!joy_rzp_pressed)
+				if(rz < 50)
 				{
-					joy_rzp_pressed = true;
-					if( JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZP_SCANCODE))
-
+					if(!joy_rzp_pressed)
+					{
+						joy_rzp_pressed = true;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZP_SCANCODE),
 								JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_RZP_SCANCODE),
-								JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);	
 					sendToJar(keyevent);
 
 				}
@@ -597,17 +570,13 @@ public class SendEvent {
 				if(joy_rzp_pressed)
 				{
 					joy_rzp_pressed = false;
-					if( JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZP_SCANCODE))
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZP_SCANCODE),
 								JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_RZP_SCANCODE),
-								JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_UP, deviceId);		
 					sendToJar(keyevent);
-
+					}
 				}
 			}
-		}
+		}}
 		/*
 		if(!touchMapped)
 		{
@@ -666,15 +635,15 @@ public class SendEvent {
 		 */
 	}
 	/**
-	 * ´¦Àí²Ù¿ØÆ÷×óÒ¡¸ËµÄÊı¾İ£¬
+	 * æ¾¶å‹­æ‚Šé¿å¶†å¸¶é£ã„¥ä¹é½å›¨æ½Œé¨å‹¬æšŸé¹î‡†ç´
 	 * 
-	 * <p>´¦ÀíÍê³Éºó»á¸ú¸ù¾İÅäÖÃÎÄ¼şÖ±½Ó·¢ËÍµ½jnsinput»òÕßÊÇ×¢Èëµ½Ó¦ÓÃ
+	 * <p>æ¾¶å‹­æ‚Šç€¹å±¾åšéšåºç´°ç’ºç†¸ç‰´é¹î‡€å¤ç¼ƒî†½æƒæµ å‰æ´¿éºãƒ¥å½‚é–«ä½¸åŸŒjnsinputé´æ ¬ï¿½é„îˆ›æ•éãƒ¥åŸŒæ´æ—‚æ•¤
 	 * 
 	 * @author Steven.xu
 	 * 
-	 * @param i ²Ù¿Ø×ÅÒ¡¸ËµÄºáÏò±ãÒËÁ¿£¬-127 ~ 127
-	 * @param j ²Ù¿ØÆ÷Ò¡¸ËµÄ×İÏòÆ«ÒÆÁ¿ ¡£-127 ~ 127
-	 * @param deviceId ²Ù¿ØÆ÷ÔÚdeviceÖĞµÄid,³ÌĞòÖĞÃ»ÓĞÈ¥»ñÈ¡¿ÉÒÔÖ±½ÓÊä0
+	 * @param i é¿å¶†å¸¶é«ï¿½æ†é‰å—™æ®‘å¦¯î„æ‚œæ¸šå®ç–é–²å¿¥ç´-127 ~ 127
+	 * @param j é¿å¶†å¸¶é£ã„¦æ†é‰å—™æ®‘ç»¾é›æ‚œé‹å¿•Ğ©é–²ï¿½éŠ†ï¿½127 ~ 127
+	 * @param deviceId é¿å¶†å¸¶é£ã„¥æ¹ªdeviceæ¶“î… æ®‘id,ç»‹å¬ªç°­æ¶“î…Ÿç—…éˆå¤Šå¹“é‘¾å³°å½‡é™îˆ™äº’é©å­˜å¸´æˆï¿½
 	 */
 	private void processLeftJoystickData(int i, int j, int deviceId) { // x = buffer[3] y = buffer[4]
 		int ox = 0x7f;
@@ -693,7 +662,7 @@ public class SendEvent {
 				if (bp.posR > 0 && bp.posType == JnsIMEPosition.TYPE_LEFT_JOYSTICK) 
 				{
 					touchMapped = true;
-					Log.d(TAG, "r="+bp.posR+", postype="+bp.posType);
+					//Log.d(TAG, "r="+bp.posR+", postype="+bp.posType);
 					double sin = calcSinA(ux, uy, JnsIMEPosition.TYPE_LEFT_JOYSTICK);
 					//						 double y = bp.posR * sin;
 					//						 double x = Math.sqrt(Math.pow(bp.posR, 2) - Math.pow(y, 2));
@@ -703,49 +672,49 @@ public class SendEvent {
 					double x = Math.sqrt(Math.pow(touchR1, 2) - Math.pow(y, 2));
 					float rawX = 0.0f;
 					float rawY = 0.0f;
-					Log.d(TAG, "ox ="+ox+",ux="+ux+",oy="+oy+",uy="+uy);
-					if (ux < ox && uy < oy) {  //åæ ‡è½´ä¸ŠåŠéƒ¨çš„å·¦
+					//Log.d(TAG, "ox ="+x+",ux="+ux+",oy="+y+",uy="+uy);
+					if (ux < ox && uy < oy) {  //æ°“èºè¬å¿™è½éˆ¥âˆ¶îŸŠé“°ç–µã¢æ¦‚çŠ†ãƒ‚åµŸçŠ†â”¢æ–îŸ‹î£â™€ï¿½æ°“è·¯å¨„
 						rawX = bp.posX - (float)x;
 						rawY = bp.posY - (float)y;
 						leftMotionKey = true;
-						Log.d(TAG, "axis positive left part");
-					} else if (ux > ox && uy < oy) {  //åæ ‡è½´ä¸ŠåŠéƒ¨çš„å³
+						//Log.d(TAG, "axis positive left part");
+					} else if (ux > ox && uy < oy) {  //æ°“èºè¬å¿™è½éˆ¥âˆ¶îŸŠé“°ç–µã¢æ¦‚çŠ†ãƒ‚åµŸçŠ†â”¢æ–îŸ‹î£â™€ï¿½æ°“è«é²
 						rawX = bp.posX + (float) x;
 						rawY = bp.posY - (float) y;
 						leftMotionKey = true;
-						Log.d(TAG, "axis positive right part");
-					} else if (ux < ox && uy > oy) { //åæ ‡è½´ä¸‹åŠéƒ¨çš„å·¦
+						//Log.d(TAG, "axis positive right part");
+					} else if (ux < ox && uy > oy) { //æ°“èºè¬å¿™è½éˆ¥âˆ¶îŸŠé“°ç–µã¢ç³•ï¿½æ°“è§è‰©èŒ…èŒ ç¯“è½æ‹§éˆ¥ç»ãƒ‚ä»¿ï¿½
 						rawX = bp.posX  - (float) x;
 						rawY = bp.posY + (float) y;
 						leftMotionKey = true;
-						Log.d(TAG, "axis negtive left part");
-					} else if (ux > ox && uy > oy) { //åæ ‡è½´ä¸‹åŠéƒ¨çš„å³
+						//Log.d(TAG, "axis negtive left part");
+					} else if (ux > ox && uy > oy) { //æ°“èºè¬å¿™è½éˆ¥âˆ¶îŸŠé“°ç–µã¢ç³•ï¿½æ°“è§è‰©èŒ…èŒ ç¯“è½æ‹§éˆ¥ç»ãƒ‚å¾›ï¿½
 						rawX = bp.posX + (float) x;
 						rawY = bp.posY + (float) y;
 						leftMotionKey = true;
-						Log.d(TAG, "axis negtiveleft part");
-					} else if (ux == ox && uy < oy) { //Yè½´å˜åŒ?
+						//Log.d(TAG, "axis negtiveleft part");
+					} else if (ux == ox && uy < oy) { //YçŒ«é™†éº“æ°“è«è—´æ°“è‰—?
 						rawX = bp.posX;
 						rawY = bp.posY - (float)y;
 						leftMotionKey = true;
-						Log.d(TAG, "axis Y < 0x7f");
-					} else if (ux == ox && uy > oy) { //Yè½´å˜åŒ?
+						//Log.d(TAG, "axis Y < 0x7f");
+					} else if (ux == ox && uy > oy) { //YçŒ«é™†éº“æ°“è«è—´æ°“è‰—?
 						rawX = bp.posX;
 						rawY = bp.posY + (float) y;
 						leftMotionKey = true;
-						Log.d(TAG, "axis Y > 0x7f");
-					} else if (ux < ox && uy == oy) { //Xè½´å˜åŒ?
+						//Log.d(TAG, "axis Y > 0x7f");
+					} else if (ux < ox && uy == oy) { //XçŒ«é™†éº“æ°“è«è—´æ°“è‰—?
 						rawX = bp.posX - (float)x;
 						rawY = bp.posY;
 						leftMotionKey = true;
-						Log.d(TAG, "axis X < 0x7f");
-					} else if (ux > ox && uy == oy) { //Xè½´å˜åŒ?
+						//Log.d(TAG, "axis X < 0x7f");
+					} else if (ux > ox && uy == oy) { //XçŒ«é™†éº“æ°“è«è—´æ°“è‰—?
 						rawX = bp.posX + (float) x;
 						rawY = bp.posY;
 						leftMotionKey = true;
-						Log.d(TAG, "axis X  > 0x7f");
+						//Log.d(TAG, "axis X  > 0x7f");
 					} else if (ux == ox && uy == oy && leftMotionKey) {
-						Log.e(TAG, "left joystick you release map");
+						//Log.e(TAG, "left joystick you release map");
 						sendToJar(posString(bp.posX, bp.posY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_MOVE));
 
 						sendToJar(posString(bp.posX, bp.posY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_UP));
@@ -754,25 +723,26 @@ public class SendEvent {
 						LeftJoystickPresed = false;
 					}
 
-					Log.d(TAG, "leftMotionKey="+leftMotionKey);
+					//Log.d(TAG, "leftMotionKey="+leftMotionKey);
 
 					if (leftMotionKey) 
 					{
-						Log.d(TAG, "LeftJoystickPresed="+LeftJoystickPresed);
+						//Log.d(TAG, "LeftJoystickPresed="+LeftJoystickPresed);
 						if(!LeftJoystickPresed)
 						{	
-							//sendToJar(posString(bp.posX, bp.posY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN));
-							//
+							//pw.print(posString(bp.posX, bp.posY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN));
+							//pw.flush();
 
 							//	socket.getOutputStream().write(posString(bp.posX, bp.posY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN).getBytes());
 							sendToJar((posString(bp.posX, bp.posY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN)));
 
 							LeftJoystickPresed = true;
 						}
-
+						
 						if(LeftJoystickPresed)
 						{
-							if((rawX != leftJoystickCurrentPosX) && (rawY != leftJoystickCurrentPosY))
+							if((rawX != leftJoystickCurrentPosX) || (rawY != leftJoystickCurrentPosY))
+								
 								if(System.currentTimeMillis() - last_left_press_time > STICK_MOVE_IRQ_TIME)
 								{	
 									sendToJar(posString(rawX, rawY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_MOVE));
@@ -787,25 +757,23 @@ public class SendEvent {
 				}
 			}
 		}
-		Log.d(TAG,"z="+ux+", y="+uy);
+		//Log.d(TAG,"z="+ux+", y="+uy);
 		if(!touchMapped)
 		{
 			int x = ux;
 			int y = uy;
 			RawEvent keyevent;
-			// ½«ÓÒÒ¡¸Ë×ª»¯³É°´¼üÓ³Éä
+			// çå——å½¸é½å›¨æ½Œæî„€å¯²é´æ„­å¯œé–¿î†½æ§§çï¿½
 
-			// Ò¡¸ËÉÏÒÆ
-			if(x > 200)
+			// é½å›¨æ½Œæ¶“å©„Ğ©
+			if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_XP_SCANCODE))
 			{	
-				if(!joy_xp_pressed)
+				if(x > 200)
 				{	
-					joy_xp_pressed = true;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_XP_SCANCODE))
+					if(!joy_xp_pressed)
+					{	
+						joy_xp_pressed = true;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XP_SCANCODE),
-								JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_XP_SCANCODE),
 								JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
 					sendToJar(keyevent);
 
@@ -816,29 +784,22 @@ public class SendEvent {
 				if(joy_xp_pressed)
 				{
 					joy_xp_pressed=false;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_XP_SCANCODE))
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XP_SCANCODE),
 								JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_XP_SCANCODE),
-								JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
 					sendToJar(keyevent);
-
+					}
 				}
 			}
 
-			// Ò¡¸ËÏÂÒÆ
-
-			if(x < 50)
+			// é½å›¨æ½Œæ¶“å¬¬Ğ©
+			if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_XI_SCANCODE))
 			{
-				if(!joy_xi_pressed)
-				{	
-					this.joy_xi_pressed = true;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_XI_SCANCODE))
+				if(x < 50)
+				{
+					if(!joy_xi_pressed)
+					{	
+						this.joy_xi_pressed = true;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XI_SCANCODE),
-								JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_XI_SCANCODE),
 								JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
 					sendToJar(keyevent);
 
@@ -849,27 +810,21 @@ public class SendEvent {
 				if(joy_xi_pressed)
 				{	
 					this.joy_xi_pressed = false;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_XI_SCANCODE))
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XI_SCANCODE),
 								JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_XI_SCANCODE),
-								JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
 					sendToJar(keyevent);
-
+					}
 				}
 			}
 
-			if(y > 200)
-			{
-				if(!joy_yi_pressed)
-				{	
-					joy_yi_pressed = true;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_YI_SCANCODE))
+			if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_YI_SCANCODE))
+			{		
+				if(y > 200)
+				{
+					if(!joy_yi_pressed)
+					{	
+						joy_yi_pressed = true;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YI_SCANCODE),
-								JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_YI_SCANCODE),
 								JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
 					sendToJar(keyevent);
 
@@ -880,28 +835,22 @@ public class SendEvent {
 				if(joy_yi_pressed)
 				{	
 					joy_yi_pressed = false;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_YI_SCANCODE))
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YI_SCANCODE),
 								JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_YI_SCANCODE),
-								JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
 					sendToJar(keyevent);
-
+				}
 				}
 
 			}
 
-			if(y < 50)
-			{
-				if(!joy_yp_pressed)
+			if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_YP_SCANCODE))
+			{	
+				if(y < 50)
 				{
-					joy_yp_pressed = true;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_YP_SCANCODE))
+					if(!joy_yp_pressed)
+					{
+						joy_yp_pressed = true;
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YP_SCANCODE),
-								JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_YP_SCANCODE),
 								JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
 					sendToJar(keyevent);
 
@@ -912,15 +861,11 @@ public class SendEvent {
 				if(joy_yp_pressed)
 				{
 					joy_yp_pressed = false;
-					if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_YP_SCANCODE))
 
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YP_SCANCODE),
 								JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					else
-						keyevent = new RawEvent(JoyStickTypeF.typeFKeyMap.get(JoyStickTypeF.BUTTON_YP_SCANCODE),
-								JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
 					sendToJar(keyevent);
-
+					}
 				}
 			}
 		}
@@ -994,6 +939,9 @@ public class SendEvent {
 			sendKeyEvent(new KeyEvent(rawevent.value, rawevent.keyCode));
 		}
 	}
+	/**
+	 * @param posString
+	 */
 	private void sendToJar(String posString)
 	{
 		if(JnsEnvInit.rooted)

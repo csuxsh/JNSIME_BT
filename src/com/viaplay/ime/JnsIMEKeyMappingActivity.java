@@ -85,7 +85,17 @@ public class JnsIMEKeyMappingActivity extends Activity implements OnClickListene
 			imageView1.setScaleType(ImageView.ScaleType.MATRIX);
 			imageView1.setImageDrawable(controller);
 		}
-		
+		/*
+		 BitmapFactory.Options options=new BitmapFactory.Options(); 
+		 options.inJustDecodeBounds = false;  
+		 InputStream is = this.getResources().openRawResource(R.drawable.key_mapping_bg);
+		 Bitmap	 bitmap = BitmapFactory.decodeStream(is,null,options);
+		 imageView1.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+		imageView1.setImageBitmap(bitmap);
+		*/
+	//	imageView1.setScaleType(ImageView.ScaleType.FIT_START);
+	//	imageView1.setImageDrawable(controller);
+	//	imageView1.setImageBitmap(bm)
 		keyMapView = (JnsIMEKeyMapView) this.findViewById(R.id.key_edit_grid);	
 		keyMapView.setHardWare(JnsIMEKeyMapView.JoyStickTypeFID);
 		if(!loadFile())

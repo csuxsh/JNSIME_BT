@@ -9,8 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.viaplay.ime.jni.JnsIMEConsole;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
@@ -31,23 +29,6 @@ public class JnsIMERoot {
 
 	public static void setContext(Context context) {
 		mContext = context;
-	}
-
-	public static void initConsole() {
-		int[] pid = new int[1];
-		String cmd = "/system/bin/sh";
-		FileDescriptor fd = JnsIMEConsole.createSubprocess(cmd, null, null, pid);
-		fos = new FileOutputStream(fd);
-		String initCommand = "export PATH=/data/local/bin:$PATH \r";
-		@SuppressWarnings("unused")
-		byte[] buffer = new byte[255];
-		try {
-
-			fos.write(initCommand.getBytes());
-			fos.flush();
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-		}
 	}
 
 	@SuppressLint("SdCardPath")
@@ -134,7 +115,7 @@ public class JnsIMERoot {
 					Log.e(TAG, "fffffffff line = " + line);
 					if (line == null) return false;
 					if (line.contains("uid=0(root)")) {
-						initConsole();
+						//initConsole();
 						if (moveJNSInput()) {
 							runJNSInput();
 						}

@@ -54,8 +54,8 @@ public class JnsIMEBtReceiver extends BroadcastReceiver {
 		if(intent.getAction().equals("android.bluetooth.device.action.PAIRING_REQUEST"))
 		{
 			try {
-				//	this.setPin(device.getClass(), device, "1234");
-				//	Toast.makeText(context, "设置配对密码为1234", Toast.LENGTH_LONG).show();
+					this.setPin(device.getClass(), device, "1234");
+					Toast.makeText(context, "设置配对密码为1234", Toast.LENGTH_LONG).show();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
