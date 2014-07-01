@@ -5,13 +5,11 @@ import com.viaplay.ime.uiadapter.FloatView;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Rect;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -78,6 +76,7 @@ public class FloatingFunc {
 	 * @param floatingViewObj
 	 *            要显示的浮动对象 View
 	 */
+	@SuppressWarnings("deprecation")
 	public static void show(Context context, Window window, View floatingViewObj) {
 		// 加载xml文件中样式例子代码
 		// ********************************Start**************************

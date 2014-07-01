@@ -22,7 +22,7 @@
             android:summary="Click to Search Device" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/changeime" >
-        <Preference
+        <CheckBoxPreference
             android:key="@string/changeime"
             android:title="@string/click_to_change" />
     </PreferenceCategory>

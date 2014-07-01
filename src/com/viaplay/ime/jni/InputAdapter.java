@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.viaplay.im.hardware.JoyStickTypeF;
 import com.viaplay.ime.JnsIMECoreService;
 import com.viaplay.ime.JnsIMEInputMethodService;
+import com.viaplay.ime.util.SendEvent;
 
 import android.content.Context;
 import android.os.Message;
@@ -32,11 +33,13 @@ public class InputAdapter {
 	 * 标记当前是否处于JNSIME模式
 	 */
 	private static boolean  mIMEMode = false;
+	public static boolean uInputMode = false;
 	public static Context mcontext;
-	private static final String TAG = "InputAdapter";
+	private static final String TAG = "JNS_InputAdapter";
 	private static RawEvent keyEvent = new RawEvent();
 	private static RawEvent oldKeyEvent = new RawEvent();
 	private static JoyStickEvent JoyEvent = new JoyStickEvent();
+	private static JoyStickEvent pJoyEvent = new JoyStickEvent();
 	/**
 	 *  头盔键是否被按下 仅够本类使用来左判断
 	 */
@@ -78,11 +81,16 @@ public class InputAdapter {
 				//Log.d(TAG, "keyEvent.scanCode="+keyEvent.scanCode+"keyEvent.value"+keyEvent.value );
 				if(JnsIMEInputMethodService.validAppName.equals("com.silvertree.cordy"))
 					keyEvent.deviceId = 0;
+				if(uInputMode && !JnsIMECoreService.keyMap.containsKey(keyEvent.scanCode) && 
+						SendEvent.iteratorKeyList(JnsIMECoreService.keyList, keyEvent.scanCode) == null)
+				{
+					SendEvent.sendKeyEvent(new RawEvent(0, keyEvent.scanCode, keyEvent.value, JoyEvent.deviceId,  1));	
+					setAxis(new RawEvent(0, 0, 0,JoyEvent.deviceId, 0));
+				}
 				if (keyEvent.value == 1) 
 				{
 					keyEvent.value = KeyEvent.ACTION_DOWN;
 					CheckIMESwitch();
-					//Log.d(TAG, "get a key down");
 					onRawKeyDown(keyEvent);
 				} 
 				else if(keyEvent.value == 2)
@@ -117,9 +125,65 @@ public class InputAdapter {
 			// TODO Auto-generated method stub
 			while (true) 
 			{
-				//		
 				if(getJoyStick())
 				{
+					if(uInputMode && 
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_XP_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_XI_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_YI_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_YP_SCANCODE) &&
+							SendEvent.iteratorKeyList(JnsIMECoreService.keyList, JoyStickTypeF.STICK_L) == null
+							)
+					{	
+						if(pJoyEvent.x != JoyEvent.x)
+							setAxis(new RawEvent(0, 0, JoyEvent.x,JoyEvent.deviceId, 3));
+						if(pJoyEvent.y != JoyEvent.y)
+							setAxis(new RawEvent(0, 1, JoyEvent.y,JoyEvent.deviceId, 3));
+					}
+					if(uInputMode && 
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_ZP_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_ZI_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZI_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZP_SCANCODE) &&
+							SendEvent.iteratorKeyList(JnsIMECoreService.keyList, JoyStickTypeF.STICK_R) == null
+							)
+					{	
+						if(pJoyEvent.z != JoyEvent.z)
+							setAxis(new RawEvent(0, 2, JoyEvent.z,JoyEvent.deviceId, 3));
+						if(pJoyEvent.rz != JoyEvent.rz)
+							setAxis(new RawEvent(0, 5, JoyEvent.rz,JoyEvent.deviceId, 3));
+					}
+					if(uInputMode && 
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_LEFT_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RIGHT_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_UP_SCANCODE) &&
+							!JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_DOWN_SCANCODE) &&
+							SendEvent.iteratorKeyList(JnsIMECoreService.keyList, JoyStickTypeF.BUTTON_LEFT_SCANCODE) == null &&
+							SendEvent.iteratorKeyList(JnsIMECoreService.keyList, JoyStickTypeF.BUTTON_RIGHT_SCANCODE) == null &&
+							SendEvent.iteratorKeyList(JnsIMECoreService.keyList, JoyStickTypeF.BUTTON_UP_SCANCODE) == null &&
+							SendEvent.iteratorKeyList(JnsIMECoreService.keyList, JoyStickTypeF.BUTTON_DOWN_SCANCODE) == null 
+						)
+					{	
+						if(pJoyEvent.hat_x != JoyEvent.hat_x)
+							setAxis(new RawEvent(0, 0x10, JoyEvent.hat_x,JoyEvent.deviceId, 3));
+						if(pJoyEvent.hat_y != JoyEvent.hat_y)
+							setAxis(new RawEvent(0, 0x11, JoyEvent.hat_y,JoyEvent.deviceId, 3));
+					}
+					if(pJoyEvent.brake != JoyEvent.brake)
+						setAxis(new RawEvent(0, 0x0a, JoyEvent.brake,JoyEvent.deviceId, 3));
+					if(pJoyEvent.gas != JoyEvent.gas)
+						setAxis(new RawEvent(0, 0x09, JoyEvent.gas,JoyEvent.deviceId, 3));
+					setAxis(new RawEvent(0, 0, 0,JoyEvent.deviceId, 0));
+					pJoyEvent.x = JoyEvent.x;
+					pJoyEvent.y = JoyEvent.y;
+					pJoyEvent.z = JoyEvent.z;
+					pJoyEvent.rz = JoyEvent.rz;
+					pJoyEvent.brake = JoyEvent.brake;
+					pJoyEvent.gas = JoyEvent.gas;
+					pJoyEvent.hat_x = JoyEvent.hat_x;
+					pJoyEvent.hat_y = JoyEvent.hat_y;
+					
+					
 					if(JnsIMEInputMethodService.validAppName.equals("com.silvertree.cordy"))
 						JoyEvent.deviceId = 0;
 					if((JoyEvent.hat_y == 0) && hatUpPressed)
@@ -181,9 +245,7 @@ public class InputAdapter {
 						gasPressed = false;
 						//gHatLeftPressed =true;
 						if(JnsIMECoreService.touchConfiging)
-							JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(
-									new KeyEvent(System.currentTimeMillis(), System.currentTimeMillis(),
-											KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BUTTON_L2, 0, 0,  JoyEvent.deviceId, JoyStickTypeF.BUTTON_GAS_SCANCODE));
+							SendEvent.sendKeyEvent(keyevent);
 						onRawKeyUp(keyevent);
 					}
 					if(JoyEvent.gas != 0  && !gasPressed)
@@ -191,8 +253,7 @@ public class InputAdapter {
 						RawEvent keyevent = new RawEvent(0, JoyStickTypeF.BUTTON_GAS_SCANCODE, KeyEvent.ACTION_DOWN, JoyEvent.deviceId);
 						gasPressed = true;
 						if(JnsIMECoreService.touchConfiging)
-							JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(new KeyEvent(System.currentTimeMillis(), System.currentTimeMillis(),
-									KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BUTTON_L2, 0, 0,  JoyEvent.deviceId, JoyStickTypeF.BUTTON_GAS_SCANCODE));
+							SendEvent.sendKeyEvent(keyevent);
 						//gHatLeftPressed =true;
 						onRawKeyDown(keyevent);
 					}
@@ -201,8 +262,7 @@ public class InputAdapter {
 						RawEvent keyevent = new RawEvent(0, JoyStickTypeF.BUTTON_BRAKE_SCANCODE, KeyEvent.ACTION_UP, JoyEvent.deviceId);
 						brakePressed = false;
 						if(JnsIMECoreService.touchConfiging)
-							JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(new KeyEvent(System.currentTimeMillis(), System.currentTimeMillis(),
-									KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BUTTON_R2, 0, 0,  JoyEvent.deviceId, JoyStickTypeF.BUTTON_BRAKE_SCANCODE));
+							SendEvent.sendKeyEvent(keyevent);
 						//gHatLeftPressed =true;
 						onRawKeyUp(keyevent);
 					}
@@ -211,8 +271,7 @@ public class InputAdapter {
 						RawEvent keyevent = new RawEvent(0, JoyStickTypeF.BUTTON_BRAKE_SCANCODE, KeyEvent.ACTION_DOWN, JoyEvent.deviceId);
 						brakePressed = true;
 						if(JnsIMECoreService.touchConfiging)
-							JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(new KeyEvent(System.currentTimeMillis(), System.currentTimeMillis(),
-									KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BUTTON_R2, 0, 0,  JoyEvent.deviceId, JoyStickTypeF.BUTTON_BRAKE_SCANCODE));
+							SendEvent.sendKeyEvent(keyevent);
 						//gHatLeftPressed =true;
 						onRawKeyDown(keyevent);
 					}
@@ -220,22 +279,22 @@ public class InputAdapter {
 					{
 						if(((JoyEvent.x != 127) || (JoyEvent.y != 127)) && !leftStickPressed)	
 						{	
-							JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_L));
+							SendEvent.sendKeyEvent(new RawEvent(KeyEvent.KEYCODE_L,KeyEvent.ACTION_DOWN,0,0 ));
 							leftStickPressed = true;
 						}
 						if(JoyEvent.x == 127 && JoyEvent.y == 127 && leftStickPressed)
 						{	
-							JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_L));
+							SendEvent.sendKeyEvent(new RawEvent(KeyEvent.KEYCODE_L,KeyEvent.ACTION_DOWN,0,0 ));
 							leftStickPressed = false;
 						}
 						if(((JoyEvent.z != 127) || (JoyEvent.rz != 127)) && !rightStickPressed)
 						{	
-							JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_R));
+							SendEvent.sendKeyEvent(new RawEvent(KeyEvent.KEYCODE_R,KeyEvent.ACTION_DOWN,0,0 ));
 							rightStickPressed = true;
 						}
 						if(((JoyEvent.z != 127) || (JoyEvent.rz != 127)) && rightStickPressed)
 						{	
-							JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_R));
+							SendEvent.sendKeyEvent(new RawEvent(KeyEvent.KEYCODE_R,KeyEvent.ACTION_DOWN,0,0 ));
 							rightStickPressed = false;
 						}
 					}
@@ -247,6 +306,7 @@ public class InputAdapter {
 					msg.what = JnsIMECoreService.HAS_STICK_DATA;
 					JnsIMECoreService.stickQueue.add(JoyEvent);
 					JnsIMECoreService.DataProcessHandler.sendMessage(msg);
+					
 				}
 			}
 
@@ -328,9 +388,12 @@ public class InputAdapter {
 		new Thread(getJoyStickRunnable).start();
 	}
 
-	public static native boolean init();
+	public static native boolean init(int w, int h);
 	public static native boolean start();
 	public static native boolean stop();
+	public static native boolean setAxis(RawEvent e);
+	public static native boolean setButton(RawEvent e);
+	
 	public static native void getKey(RawEvent event);
 	private static boolean getKey()
 	{

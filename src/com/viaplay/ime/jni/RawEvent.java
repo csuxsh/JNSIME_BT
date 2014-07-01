@@ -8,12 +8,21 @@ package com.viaplay.ime.jni;
  */
 public class RawEvent {
 	
+	public RawEvent(int keyCode, int scanCode, int value, int deviceId, int type)
+	{
+		this.value = value;
+		this.keyCode = keyCode;
+		this.scanCode = scanCode;
+		this.deviceId = deviceId;
+		this.type = type;
+	}
 	public RawEvent(int keyCode, int scanCode, int value, int deviceId)
 	{
 		this.value = value;
 		this.keyCode = keyCode;
 		this.scanCode = scanCode;
 		this.deviceId = deviceId;
+		this.type = 1;
 	}
 	public RawEvent()
 	{
@@ -23,4 +32,5 @@ public class RawEvent {
 	public int value = 0;
 	public int keyCode = 0;
 	public int deviceId = 0;
+	public int type = 0;
 }

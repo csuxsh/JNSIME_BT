@@ -159,6 +159,7 @@ public class JnsIMEGameListActivity extends Activity{
 			mapin.putExtra("lable", lable);
 			JnsIMEGameListActivity.this.startActivity(mapin);
 		}
+		@SuppressWarnings("deprecation")
 		@Override
 		public void onClick(View v) {
 			// TODO Auto-generated method stub

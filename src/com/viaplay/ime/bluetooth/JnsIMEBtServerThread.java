@@ -2,21 +2,15 @@ package com.viaplay.ime.bluetooth;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-
-import com.viaplay.ime.JnsIMEBtService;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
-import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 /**
  * 蓝牙服务子线程主要用于连接蓝牙启动蓝牙守护进程,需求android4.0以上
@@ -28,8 +22,8 @@ import android.widget.Toast;
 public class JnsIMEBtServerThread extends Thread{
 	
 	
-	final static String TAG ="";
-
+	final static String TAG ="BTserver";
+ 
 	BluetoothSocket socket;
 	BluetoothDevice device;
 	Context mContext;
@@ -53,7 +47,7 @@ public class JnsIMEBtServerThread extends Thread{
 			BluetoothDevice coDevice = connectingList.get(i);
 			if(this.device.getAddress().equals(coDevice.getAddress()))
 			{				
-				Log.e(device.getName(), " is connecting");
+				Log.e(TAG,device.getName()+ " is connecting");
 				return;
 			}
 		}
@@ -68,9 +62,12 @@ public class JnsIMEBtServerThread extends Thread{
 			{
 				socket = mAdapter.getRemoteDevice(device.getAddress()).createInsecureRfcommSocketToServiceRecord(myuuid);//createRfcommSocketToServiceRecord(myuuid);
 				socket.connect();
+				Log.e(TAG,device.getName()+ " connect ok");
+				
 			}
 			catch (IOException e)
 			{
+				Log.e(TAG,device.getName()+ " connect failed");
 				try 
 				{
 					socket.close();
@@ -80,6 +77,7 @@ public class JnsIMEBtServerThread extends Thread{
 				catch (IOException e1)
 				{
 					e1.printStackTrace();
+					socket= null;
 				}
 			}
 			try {

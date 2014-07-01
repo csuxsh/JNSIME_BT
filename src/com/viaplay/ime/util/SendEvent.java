@@ -1,21 +1,20 @@
 package com.viaplay.ime.util;
 
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
 
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import com.viaplay.im.hardware.JoyStickTypeF;
 import com.viaplay.ime.JnsIMECoreService;
-import com.viaplay.ime.JnsIMEInputMethodService;
 import com.viaplay.ime.bean.JnsIMEPosition;
 import com.viaplay.ime.bean.JnsIMEProfile;
+import com.viaplay.ime.bean.KeyBoard;
+import com.viaplay.ime.jni.InputAdapter;
 import com.viaplay.ime.jni.JoyStickEvent;
 import com.viaplay.ime.jni.RawEvent;
 /**
@@ -28,8 +27,8 @@ import com.viaplay.ime.jni.RawEvent;
 public class SendEvent {
 
 	public final static String pkgName ="com.viaplay.ime";
-	public final static String TAG= "SendEvent";
-	
+	public final static String TAG= "JNS_SendEvent";
+
 	private final static int  STICK_MOVE_IRQ_TIME = 1;
 	/**
 	 * 鍙戦�鍒癹nsinput瑙︽懜娑堟伅鐨勬爣绀哄ご
@@ -174,7 +173,7 @@ public class SendEvent {
 			catch(Exception e)
 			{	
 				//	e.printStackTrace();
-					JnsEnvInit.startJnsInputServier();
+				JnsEnvInit.startJnsInputServier();
 				connect = false;
 				try {
 					Thread.sleep(3000);
@@ -201,7 +200,7 @@ public class SendEvent {
 	 * @return 杩炴帴鎴愬姛杩斿洖true,鍚﹀垯杩斿洖false
 	 */
 	@SuppressWarnings("unused")
-	private static JnsIMEProfile iteratorKeyList(List<JnsIMEProfile> keylist, int scancode)
+	public static JnsIMEProfile iteratorKeyList(List<JnsIMEProfile> keylist, int scancode)
 	{
 		//Log.d(TAG, "list size"+keylist.size());
 		if(keylist==null)
@@ -236,6 +235,16 @@ public class SendEvent {
 		return false;
 
 	}
+	public static boolean sendKeyEvent(RawEvent keyevent)
+	{
+		if(InputAdapter.uInputMode)
+		{
+			InputAdapter.setButton(keyevent);
+		}
+		else
+			sendToJar(keyevent);
+		return false;
+	}
 	/**
 	 * 娉ㄥ叆鎿嶆帶鍣ㄧ殑keyevent浜嬩欢
 	 * 
@@ -258,21 +267,19 @@ public class SendEvent {
 		if(null == keyProfile)
 		{	
 			//Log.d(TAG, "keyprofile  is  null");
-			if(!JnsIMECoreService.keyMap.containsKey(keyevent.scanCode))
-			{	
-				keyevent.keyCode = JoyStickTypeF.typeFKeyMap.get(keyevent.scanCode);
-				JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(
-						new KeyEvent(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
-								keyevent.value, keyevent.keyCode,0, 0, 1, keyevent.scanCode));
-			}
-			else
+			if(JnsIMECoreService.keyMap.containsKey(keyevent.scanCode))
 			{	
 				keyevent.keyCode = JnsIMECoreService.keyMap.get(keyevent.scanCode);
+				keyevent.scanCode = KeyBoard.scanCodes.get(keyevent.keyCode);
+				keyevent.value = (keyevent.value == 1)?0:1;
+				SendEvent.sendKeyEvent(keyevent);
+				InputAdapter.setButton(new RawEvent(0 ,0, 0, 0, 0));
+
+				/*
 				JnsIMECoreService.ime.getCurrentInputConnection().sendKeyEvent(
 						new KeyEvent(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
 								keyevent.value, keyevent.keyCode,0, 0, 1, keyevent.scanCode));
-				//sendToJar(keyString(keyevent));
-				//
+				 */
 			}
 		}
 		//Log.d(TAG, "keyprofile  is not null");
@@ -304,8 +311,14 @@ public class SendEvent {
 	{
 		if(JnsIMECoreService.touchConfiging)
 			return;
-		processRightJoystickData(joyevent.getZ(), joyevent.getRz(), joyevent.getDeviceId());
 		processLeftJoystickData(joyevent.getX(), joyevent.getY(), joyevent.getDeviceId());
+		try {
+			Thread.sleep(20);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		processRightJoystickData(joyevent.getZ(), joyevent.getRz(), joyevent.getDeviceId());
 	}
 	private static String keyString(RawEvent keyevent)
 	{
@@ -445,24 +458,24 @@ public class SendEvent {
 					if (rightMotionKey) {
 						if(!RightJoystickPresed)
 						{
-							sendToJar(posString(bp.posX, bp.posY, JoyStickTypeF.RIGHT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN));
+							sendToJar(posString(rawX,rawY, JoyStickTypeF.RIGHT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN));
 
 							RightJoystickPresed = true;								
 						}
 
 						if(RightJoystickPresed)
 						{
-							if((rawX != rightJoystickCurrentPosX) || (rawY != rightJoystickCurrentPosY))
-								if(System.currentTimeMillis() - last_right_press_time > STICK_MOVE_IRQ_TIME)
-								{		
-									sendToJar(posString(rawX, rawY, JoyStickTypeF.RIGHT_JOYSTICK_TAG, MotionEvent.ACTION_MOVE));
+							if((Math.abs(rawX - rightJoystickCurrentPosX) > bp.posR / 5) || 
+									(Math.abs(rawY -rightJoystickCurrentPosY)) >  bp.posR / 5)
+							{		
+								sendToJar(posString(rawX, rawY, JoyStickTypeF.RIGHT_JOYSTICK_TAG, MotionEvent.ACTION_MOVE));
 
-									last_right_press_time = System.currentTimeMillis();
-								}
+								last_right_press_time = System.currentTimeMillis();
+								rightJoystickCurrentPosX = rawX;
+								rightJoystickCurrentPosY = rawY;
+							}
 						}
 					}
-					rightJoystickCurrentPosX = rawX;
-					rightJoystickCurrentPosY = rawY;
 				}
 			}
 		}
@@ -480,20 +493,22 @@ public class SendEvent {
 					if(!joy_zp_pressed)
 					{
 						joy_zp_pressed = true;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZP_SCANCODE),
-								JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					sendToJar(keyevent);
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZP_SCANCODE),
+						//		JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
+						//sendToJar(keyevent);
 
+					}
 				}
-			}
-			else
-			{
-				if(joy_zp_pressed)
+				else
 				{
-					joy_zp_pressed = false;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZP_SCANCODE),
-								JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_UP,deviceId);
-					sendToJar(keyevent);
+					if(joy_zp_pressed)
+					{
+						joy_zp_pressed = false;
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_UP, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZP_SCANCODE),
+						//		JoyStickTypeF.BUTTON_ZP_SCANCODE, KeyEvent.ACTION_UP,deviceId);
+						//sendToJar(keyevent);
 					}
 				}
 			}
@@ -505,78 +520,84 @@ public class SendEvent {
 					if(!joy_zi_pressed)
 					{
 						joy_zi_pressed = true;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZI_SCANCODE),
-								JoyStickTypeF.BUTTON_ZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					sendToJar(keyevent);
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_ZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZI_SCANCODE),
+						//		JoyStickTypeF.BUTTON_ZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
+						//sendToJar(keyevent);
 
-				}
-			}	
-			else
-			{	
-				if(joy_zi_pressed)
-				{
-					joy_zi_pressed = false;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZI_SCANCODE),
-								JoyStickTypeF.BUTTON_ZI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					sendToJar(keyevent);
-
-				}
-			}
-
-			if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZI_SCANCODE))
-			{				
-				if(rz > 200)
-				{
-
-					if(!joy_rzi_pressed)
+					}
+				}	
+				else
+				{	
+					if(joy_zi_pressed)
 					{
+						joy_zi_pressed = false;
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_ZI_SCANCODE, KeyEvent.ACTION_UP, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_ZI_SCANCODE),
+						//		JoyStickTypeF.BUTTON_ZI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
+						//sendToJar(keyevent);
 
-						joy_rzi_pressed = true;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZI_SCANCODE),
-								JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					sendToJar(keyevent);
-
-				}
-			}
-			else
-			{	
-				if(joy_rzi_pressed)
-				{
-
-						joy_rzi_pressed = false;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZI_SCANCODE),
-								JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					sendToJar(keyevent);
 					}
 				}
 
-			}
-
-			if( JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZP_SCANCODE))
-			{
-				if(rz < 50)
-				{
-					if(!joy_rzp_pressed)
+				if(JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZI_SCANCODE))
+				{				
+					if(rz > 200)
 					{
-						joy_rzp_pressed = true;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZP_SCANCODE),
-								JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					sendToJar(keyevent);
+
+						if(!joy_rzi_pressed)
+						{
+
+							joy_rzi_pressed = true;
+							sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId));
+							//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZI_SCANCODE),
+							//		JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
+							//sendToJar(keyevent);
+
+						}
+					}
+					else
+					{	
+						if(joy_rzi_pressed)
+						{
+
+							joy_rzi_pressed = false;
+							sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_UP, deviceId));
+							//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZI_SCANCODE),
+							//		JoyStickTypeF.BUTTON_RZI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
+							//sendToJar(keyevent);
+						}
+					}
 
 				}
-			}
-			else
-			{
-				if(joy_rzp_pressed)
+
+				if( JnsIMECoreService.keyMap.containsKey(JoyStickTypeF.BUTTON_RZP_SCANCODE))
 				{
-					joy_rzp_pressed = false;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZP_SCANCODE),
-								JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					sendToJar(keyevent);
+					if(rz < 50)
+					{
+						if(!joy_rzp_pressed)
+						{
+							joy_rzp_pressed = true;
+							sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId));
+						//	keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZP_SCANCODE),
+						//			JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
+						//	sendToJar(keyevent);
+
+						}
+					}
+					else
+					{
+						if(joy_rzp_pressed)
+						{
+							joy_rzp_pressed = false;
+							sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_UP, deviceId));
+							//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_RZP_SCANCODE),
+							//		JoyStickTypeF.BUTTON_RZP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
+							//sendToJar(keyevent);
+						}
 					}
 				}
-			}
-		}}
+			}}
 		/*
 		if(!touchMapped)
 		{
@@ -734,26 +755,25 @@ public class SendEvent {
 							//pw.flush();
 
 							//	socket.getOutputStream().write(posString(bp.posX, bp.posY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN).getBytes());
-							sendToJar((posString(bp.posX, bp.posY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN)));
+							sendToJar((posString(rawX, rawY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_DOWN)));
 
 							LeftJoystickPresed = true;
 						}
-						
+
 						if(LeftJoystickPresed)
 						{
-							if((rawX != leftJoystickCurrentPosX) || (rawY != leftJoystickCurrentPosY))
-								
-								if(System.currentTimeMillis() - last_left_press_time > STICK_MOVE_IRQ_TIME)
-								{	
-									sendToJar(posString(rawX, rawY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_MOVE));
+							if((Math.abs(rawX - leftJoystickCurrentPosX) > bp.posR / 5) || 
+									(Math.abs(rawY -leftJoystickCurrentPosY)) >  bp.posR / 5)
+							{	
+								sendToJar(posString(rawX, rawY, JoyStickTypeF.LEFT_JOYSTICK_TAG, MotionEvent.ACTION_MOVE));
 
-									last_left_press_time = System.currentTimeMillis();
-								}
+								last_left_press_time = System.currentTimeMillis();
+								leftJoystickCurrentPosX = rawX;
+								leftJoystickCurrentPosY = rawY;
+							}
 						}
 
 					}
-					leftJoystickCurrentPosX = rawX;
-					leftJoystickCurrentPosY = rawY;
 				}
 			}
 		}
@@ -773,20 +793,22 @@ public class SendEvent {
 					if(!joy_xp_pressed)
 					{	
 						joy_xp_pressed = true;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XP_SCANCODE),
-								JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					sendToJar(keyevent);
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XP_SCANCODE),
+						//		JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
+						//sendToJar(keyevent);
 
+					}
 				}
-			}
-			else 
-			{
-				if(joy_xp_pressed)
+				else 
 				{
-					joy_xp_pressed=false;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XP_SCANCODE),
-								JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					sendToJar(keyevent);
+					if(joy_xp_pressed)
+					{
+						joy_xp_pressed=false;
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_UP, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XP_SCANCODE),
+						//		JoyStickTypeF.BUTTON_XP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
+						//sendToJar(keyevent);
 					}
 				}
 			}
@@ -799,20 +821,22 @@ public class SendEvent {
 					if(!joy_xi_pressed)
 					{	
 						this.joy_xi_pressed = true;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XI_SCANCODE),
-								JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					sendToJar(keyevent);
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XI_SCANCODE),
+						//		JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
+						//sendToJar(keyevent);
 
+					}
 				}
-			}
-			else
-			{
-				if(joy_xi_pressed)
-				{	
-					this.joy_xi_pressed = false;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XI_SCANCODE),
-								JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					sendToJar(keyevent);
+				else
+				{
+					if(joy_xi_pressed)
+					{	
+						this.joy_xi_pressed = false;
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_UP, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_XI_SCANCODE),
+						//		JoyStickTypeF.BUTTON_XI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
+						//sendToJar(keyevent);
 					}
 				}
 			}
@@ -824,21 +848,23 @@ public class SendEvent {
 					if(!joy_yi_pressed)
 					{	
 						joy_yi_pressed = true;
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId));
 						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YI_SCANCODE),
 								JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					sendToJar(keyevent);
+						sendToJar(keyevent);
 
+					}
 				}
-			}
-			else
-			{
-				if(joy_yi_pressed)
-				{	
-					joy_yi_pressed = false;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YI_SCANCODE),
-								JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					sendToJar(keyevent);
-				}
+				else
+				{
+					if(joy_yi_pressed)
+					{	
+						joy_yi_pressed = false;
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_UP, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YI_SCANCODE),
+						//		JoyStickTypeF.BUTTON_YI_SCANCODE, KeyEvent.ACTION_UP, deviceId);
+						//sendToJar(keyevent);
+					}
 				}
 
 			}
@@ -850,21 +876,22 @@ public class SendEvent {
 					if(!joy_yp_pressed)
 					{
 						joy_yp_pressed = true;
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YP_SCANCODE),
-								JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
-					sendToJar(keyevent);
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YP_SCANCODE),
+						//		JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_DOWN, deviceId);
+						//sendToJar(keyevent);
 
+					}
 				}
-			}
-			else
-			{
-				if(joy_yp_pressed)
+				else
 				{
-					joy_yp_pressed = false;
-
-						keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YP_SCANCODE),
-								JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
-					sendToJar(keyevent);
+					if(joy_yp_pressed)
+					{
+						joy_yp_pressed = false;
+						sendKey(new RawEvent(0,JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_UP, deviceId));
+						//keyevent = new RawEvent(JnsIMECoreService.keyMap.get(JoyStickTypeF.BUTTON_YP_SCANCODE),
+						//		JoyStickTypeF.BUTTON_YP_SCANCODE, KeyEvent.ACTION_UP, deviceId);
+						//sendToJar(keyevent);
 					}
 				}
 			}
@@ -926,17 +953,23 @@ public class SendEvent {
 		}
 		 */
 	}
-	private void sendToJar(RawEvent rawevent)
+	private static void sendToJar(RawEvent rawevent)
 	{
-		if(JnsEnvInit.rooted)
-		{
-			pw.print(keyString(rawevent));
-			pw.flush();
+		try{
+			if(JnsEnvInit.rooted)
+			{
+				pw.print(keyString(rawevent));
+				pw.flush();
+			}
+			else
+			{
+				///JnsIMECoreService.ime.getCurrentInputConnection().
+				//sendKeyEvent(new KeyEvent(rawevent.value, rawevent.keyCode));
+			}
 		}
-		else
+		catch(Exception e)
 		{
-			JnsIMECoreService.ime.getCurrentInputConnection().
-			sendKeyEvent(new KeyEvent(rawevent.value, rawevent.keyCode));
+
 		}
 	}
 	/**

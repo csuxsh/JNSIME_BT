@@ -1,4 +1,4 @@
-#define LOG_TAG "JN_INPUT_ADAPTER"
+#define LOG_TAG "JNS_INPUT_ADAPTER"
 
 #ifdef BUILD_NDK
 #else
@@ -17,7 +17,7 @@
 #include "CallBackInterface.h"
 #include "com_viaplay_ime_jni_InputAdapter.h"
 #include <sys/syscall.h>
-
+#include <linux/uinput.h>
 
 
 #define gettid()   syscall(__NR_gettid)
@@ -26,9 +26,13 @@
 static int ovalue = 0;
 static int getvalue = 0;
 static bool waitForgetKey = false;
-static bool waitForgetJoy = false;
+bool waitForgetJoy = false;
 static int joy_num = 0;
-
+int  uinput_fd = -1;
+int  uinput_screen = -1;
+struct input_event event;
+struct uinput_user_dev uinp, virturl_screen;
+const char *dev = "/dev/uinput";
 
 struct fields_t {
 	jmethodID onInputAdapterKeyDown;
@@ -47,10 +51,10 @@ static stJniGlobal_t sg_jni_global;
 static jclass g_com_viaplay_ime_jni_InputAdapter_class;
 
 //消费者信号量
-static pthread_cond_t keyCond;
-static pthread_mutex_t keyMutex;
-static pthread_cond_t joyCond;
-static pthread_mutex_t joyMutex;
+pthread_cond_t keyCond;
+pthread_mutex_t keyMutex;
+pthread_cond_t joyCond;
+pthread_mutex_t joyMutex;
 pthread_cond_t getDeviceCond;
 pthread_mutex_t getDeviceMutex;
 
@@ -150,6 +154,89 @@ void delay(int i)
 		i--;
 	}
 }
+int setup_virtural_screen()
+{
+	// Temporary variable
+	int i=0;
+	// Open the input device
+	uinput_screen = open("/dev/uinput", O_WRONLY | O_NDELAY);
+
+	if(!uinput_fd)
+	{
+		LOGE("Unable to open /dev/uinput/ for virtural screen");
+		return -1;
+	}
+	memset(&virturl_screen,0,sizeof(uinp)); // Intialize the uInput device to NULL
+	strncpy(virturl_screen.name, "STEVEN TOUCH TEST", UINPUT_MAX_NAME_SIZE);
+
+	uinp.id.version = 1;
+	uinp.id.bustype = BUS_USB;
+	virturl_screen
+}
+int setup_uinput_device()
+{
+	// Temporary variable
+	int i=0;
+
+	// Open the input device
+	uinput_fd = open("/dev/uinput", O_WRONLY | O_NDELAY);
+	if(!uinput_fd)
+	{
+		LOGE("Unable to open /dev/uinput/n");
+		return -1;
+	}
+
+	memset(&uinp,0,sizeof(uinp)); // Intialize the uInput device to NULL
+	strncpy(uinp.name, "STEVEN TEST", UINPUT_MAX_NAME_SIZE);
+	uinp.id.version = 1;
+
+	uinp.id.bustype = BUS_USB;
+
+	uinp.absmax[0] = 255;
+	uinp.absmax[1] = 255;
+	uinp.absmax[2] = 255;
+	uinp.absmax[5] = 255;
+	uinp.absmax[9] = 255;
+	uinp.absmax[10] = 255;
+	uinp.absmax[16] = 1;
+	uinp.absmax[17] = 1;
+	uinp.absmin[16] = -1;
+	uinp.absmin[17] = -1;
+
+	// Setup the uinput device
+
+
+	ioctl(uinput_fd, UI_SET_EVBIT, EV_ABS);
+	ioctl(uinput_fd, UI_SET_ABSBIT, ABS_X);
+	ioctl(uinput_fd, UI_SET_ABSBIT, ABS_Y);
+	ioctl(uinput_fd, UI_SET_ABSBIT, ABS_Z);
+	ioctl(uinput_fd, UI_SET_ABSBIT, ABS_RZ);
+	ioctl(uinput_fd, UI_SET_ABSBIT, ABS_BRAKE);
+	ioctl(uinput_fd, UI_SET_ABSBIT, ABS_GAS);
+	ioctl(uinput_fd, UI_SET_ABSBIT, ABS_HAT0X);
+	ioctl(uinput_fd, UI_SET_ABSBIT, ABS_HAT0Y);
+
+	ioctl(uinput_fd, UI_SET_EVBIT, EV_KEY);
+	for(i = 0; i < 247; i++)
+		ioctl(uinput_fd, UI_SET_KEYBIT, i);
+
+
+	for(i = 0x130; i < 0x13e; i++)
+		ioctl(uinput_fd, UI_SET_KEYBIT, i);
+
+	ioctl(uinput_fd, UI_SET_KEYBIT, 353);
+
+	/* Create input device into input sub-system */
+	if(write(uinput_fd, &uinp, sizeof(uinp)) != sizeof(uinp))
+		LOGE("WRITE UINPUT FAILED");
+	if (ioctl(uinput_fd, UI_DEV_CREATE))
+	{
+		LOGE("Unable to create UINPUT device.");
+		return -1;
+	}
+	return 1;
+}
+
 
 class InputAdapterCallBack : public CallBackInterface {
 public:
@@ -181,15 +268,9 @@ public:
 		int value = rawEvent->value;
 		int deviceId = rawEvent->deviceId;
 
-		while(waitForgetJoy)
-		{
-			LOGE("[%s][%d] ==> waitForgetJoy", __FUNCTION__, __LINE__);
-		}
-		pthread_mutex_lock(&joyMutex);
+
 		if(rawEvent->type != 0)
 			doOnJoystickDataChange(scanCode, value, deviceId);
-		pthread_cond_signal(&joyCond);
-		pthread_mutex_unlock(&joyMutex);
 		//LOGE("[%s][%d] ==> notify getjoy ", __FUNCTION__, __LINE__);
 		//delay(1000);
 		return 1; 
@@ -206,6 +287,8 @@ static sp<InputAdapterCallBack> mInputAdapterCallBack;
 
 JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_init(JNIEnv *env, jclass clazz) {
 	init_jni_global();
+	jclass inputAdapter = env->FindClass("com/viaplay/ime/jni/InputAdapter");
+	jfieldID uinputmode = env->GetStaticFieldID (inputAdapter, "uInputMode", "Z");
 	env->GetJavaVM(&sg_jni_global.jvm);
 	pthread_mutex_init(&keyMutex, NULL);
 	pthread_cond_init(&keyCond, NULL);
@@ -221,6 +304,13 @@ JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_init(JNIEnv *en
 	joyStickEvent.y = 0x7f;
 	joyStickEvent.z = 0x7f;
 	joyStickEvent.rz = 0x7f;
+	if(!setup_uinput_device())
+		LOGE("[%s][%d] ==> UINPUT FAILED", __FUNCTION__, __LINE__);
+	else
+	{
+		jboolean b = 1;
+		env->SetStaticBooleanField(inputAdapter, uinputmode, (jboolean)1);
+	}
 	return JNI_TRUE;
 }
 
@@ -239,8 +329,11 @@ JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_stop(JNIEnv *en
 		LOGE("[%s][%d] ==> mInputAdapter is NULL", __FUNCTION__, __LINE__);
 		return JNI_FALSE;
 	}
-
+	pthread_mutex_unlock(&keyMutex);
+	pthread_mutex_unlock(&joyMutex);
 	mInputAdapter->stop();
+	ioctl(uinput_fd, UI_DEV_DESTROY);
+	close(uinput_fd);
 	return JNI_TRUE;
 }
 
@@ -262,9 +355,6 @@ JNIEXPORT void JNICALL Java_com_viaplay_ime_jni_InputAdapter_getKey (JNIEnv *env
 	env->SetIntField(rawEvent, deviceId, keyEvent.deviceId);
 	waitForgetKey =  true;
 	pthread_mutex_unlock(&keyMutex);
-
-
-
 }
 
 JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_getJoyStick
@@ -329,4 +419,48 @@ JNIEXPORT jobject JNICALL Java_com_viaplay_ime_jni_InputAdapter_getDeviceList
 		env->CallBooleanMethod(list_obj , list_add , dvicename); //执行Arraylist类实例的add方法，添加一个String
 	}
 	return list_obj ;
+}
+/*
+ * Class:     com_viaplay_ime_jni_InputAdapter
+ * Method:    setAxis
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_setAxis
+(JNIEnv * env , jclass clazz, jobject e)
+{
+	jclass cls = env->GetObjectClass(e);
+	jfieldID type = env->GetFieldID(cls, "type", "I");
+	jfieldID code = env->GetFieldID(cls, "scanCode", "I");
+	jfieldID value = env->GetFieldID(cls, "value", "I");
+
+	memset(&event, 0, sizeof(event));
+	event.type =  (unsigned char) env->GetIntField( e, type);
+	event.code =   (unsigned char)env->GetIntField(e, code);
+	if((event.code == ABS_HAT0X) || (event.code == ABS_HAT0Y))
+		event.value = env->GetIntField(e, value);
+	else
+		event.value =  (unsigned char)env->GetIntField(e, value);
+	LOGE("[%s][%d] ==> code=[%d],type=[%d],value[%d]", __FUNCTION__, __LINE__,event.code,event.type,event.value);
+	write(uinput_fd, &event, sizeof(event));
+}
+
+/*
+ * Class:     com_viaplay_ime_jni_InputAdapter
+ * Method:    setButton
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_setButton
+(JNIEnv * env , jclass clazz, jobject e)
+{
+	jclass cls = env->GetObjectClass(e);
+	jfieldID type = env->GetFieldID(cls, "type", "I");
+	jfieldID code = env->GetFieldID(cls, "scanCode", "I");
+	jfieldID value = env->GetFieldID(cls, "value", "I");
+
+	memset(&event, 0, sizeof(event));
+	event.type =   env->GetIntField( e, type);
+	event.code =   env->GetIntField(e, code);
+	event.value =  env->GetIntField( e, value);
+	LOGE("[%s][%d] ==> code=[%d],type=[%d],value[%d]", __FUNCTION__, __LINE__,event.code,event.type,event.value);
+	write(uinput_fd, &event, sizeof(event));
 }

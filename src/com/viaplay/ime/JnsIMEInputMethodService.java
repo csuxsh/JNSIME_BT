@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -33,6 +35,7 @@ import android.content.SharedPreferences.Editor;
 import android.inputmethodservice.InputMethodService;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -45,7 +48,7 @@ import android.view.WindowManager;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView.ScaleType;
 
-public class JnsIMEInputMethodService extends InputMethodService implements android.content.DialogInterface.OnClickListener {
+public class JnsIMEInputMethodService extends Service implements android.content.DialogInterface.OnClickListener {
 
 	private final static String TAG = "JnsIMEMethod";
 	private final static String KEY_MAP_FILE_TAG = ".keymap";
@@ -62,14 +65,35 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 	private FloatView floatingView = null;
 	public static Handler floatingHandler = null;
 
+	
 
-	@SuppressLint({ "SdCardPath", "HandlerLeak" })
+	static class InputHandler extends Handler
+	{
+		WeakReference<JnsIMEInputMethodService> mActivity;
+		   
+		InputHandler(JnsIMEInputMethodService context) {
+                mActivity = new WeakReference<JnsIMEInputMethodService>(context);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+        
+          }
+        
+	};
+
+	@SuppressLint({ "SdCardPath"})
 	@Override
 	public void onCreate()
 	{
 		super.onCreate();
 		jnsIMEInUse = true;
 		JnsIMECoreService.ime = this;
+		// 启动核心服务
+	    if(JnsIMECoreService.initialed)
+        	return;
+        Intent intent = new Intent("com.viaplay.ime.JnsIMECore");
+		this.startService(intent);
 		// 设置浮动窗属性
 		floatingView = new FloatView(this);  
 		floatingView.setImageResource(R.drawable.shot_normal);
@@ -96,7 +120,7 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 		}
 		if(pre.getBoolean("floatViewS", false))	
 			FloatingFunc.show(this.getApplicationContext(), null, floatingView);
-		floatingHandler = new Handler()
+		floatingHandler = new InputHandler(this)
 		{
 			@Override
 			public void handleMessage(Message  msg)
@@ -145,7 +169,6 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 			}
 
 		}).start();
-			createDefautKeyFile();
 	}
 		@SuppressWarnings("deprecation")
 	void showPopWin()
@@ -174,71 +197,19 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 	/**
 	 * 创建默认的触摸映射,用于蓝牙模式.因为蓝牙模式数据需要全部转发,读event模式不需要转发数据
 	 */
-	private void createDefautKeyFile()
-	{
-		File selffile = new File(this.getFilesDir() + "/" + this.getPackageName()+KEY_MAP_FILE_TAG);
-		if(!selffile.exists())
-		{	
-			FileOutputStream fos = null;
-			try {
-				fos = this.openFileOutput(this.getPackageName()+KEY_MAP_FILE_TAG  , Context.MODE_PRIVATE);
-				writeDefaut(fos);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		File default1 = new File(this.getFilesDir() + "/default1"+KEY_MAP_FILE_TAG);
-		if(!default1.exists())
-		{
-			FileOutputStream fos = null;
-			try {
-				fos = this.openFileOutput("default1"+KEY_MAP_FILE_TAG  , Context.MODE_PRIVATE);
-				writeDefaut(fos);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-	private void writeDefaut(FileOutputStream fos)
-	{
-		try {
-			fos.write((JoyStickTypeF.BUTTON_A+":GameA"+":"+JoyStickTypeF.BUTTON_A_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_A+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_B+":GameB"+":"+JoyStickTypeF.BUTTON_B_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_B+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_X+":GameX"+":"+JoyStickTypeF.BUTTON_X_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_X+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_Y+":GameY"+":"+JoyStickTypeF.BUTTON_Y_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_Y+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_L1+":L1"+":"+JoyStickTypeF.BUTTON_L1_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_L1+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_L2+":L2"+":"+JoyStickTypeF.BUTTON_GAS_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_L2+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_R1+":R1"+":"+JoyStickTypeF.BUTTON_R1_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_R1+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_R2+":R2"+":"+JoyStickTypeF.BUTTON_BRAKE_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_R2+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_DOWN+":Down"+":"+JoyStickTypeF.BUTTON_DOWN_SCANCODE+":"+KeyEvent.KEYCODE_DPAD_DOWN+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_UP+":Up"+":"+JoyStickTypeF.BUTTON_UP_SCANCODE+":"+KeyEvent.KEYCODE_DPAD_UP+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_LEFT+":Left"+":"+JoyStickTypeF.BUTTON_LEFT_SCANCODE+":"+KeyEvent.KEYCODE_DPAD_LEFT+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_RIGHT+":Right"+":"+JoyStickTypeF.BUTTON_RIGHT_SCANCODE+":"+KeyEvent.KEYCODE_DPAD_RIGHT+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_YI+":Down"+":"+JoyStickTypeF.BUTTON_YI_SCANCODE+":"+KeyEvent.KEYCODE_DPAD_DOWN+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_YP+":Up"+":"+JoyStickTypeF.BUTTON_YP_SCANCODE+":"+KeyEvent.KEYCODE_DPAD_UP+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_XI+":Left"+":"+JoyStickTypeF.BUTTON_XI_SCANCODE+":"+KeyEvent.KEYCODE_DPAD_LEFT+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_XP+":Right"+":"+JoyStickTypeF.BUTTON_XP_SCANCODE+":"+KeyEvent.KEYCODE_DPAD_RIGHT+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_SELECT+":Select"+":"+JoyStickTypeF.BUTTON_SELECT_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_SELECT+"\n").getBytes());
-			fos.write((JoyStickTypeF.BUTTON_START+":Start"+":"+JoyStickTypeF.BUTTON_START_SCANCODE+":"+KeyEvent.KEYCODE_BUTTON_START+"\n").getBytes());
 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
 	@Override
 	public void onDestroy () 
 	{
-		this.onCreateInputView();
 		super.onDestroy();
 		jnsIMEInUse = false;
 		floatingHandler = null;
 		JnsIMECoreService.keyList.clear();
 		JnsIMECoreService.keyMap.clear();
 		FloatingFunc.close(this);
+        Intent intent = new Intent("com.viaplay.ime.JnsIMECore");
+		this.stopService(intent);
+		
 	}
 	/**
 	 * 虏茅脩炉碌卤脟掳碌脛脢脗录镁脢脟路帽脌麓脭麓脫脷脪隆赂脣禄貌脮脽脥路驴酶
@@ -329,6 +300,7 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 		}).start();
 		return true;
 	}
+	/*
 	public boolean onKeyDown(int keyCode, KeyEvent event)
 	{
 		/*
@@ -343,6 +315,7 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 			}
 		}
 		 */
+	/*
 		if(JnsIMECoreService.touchConfiging)
 			return false;
 		KeyEvent tmpEvent = mathJoyStick(event);
@@ -364,6 +337,7 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 		}
 		return false;
 	}
+*/
 	/**
 	 *  陆脴脥录路陆路篓隆拢2.3脪脭脡脧脥篓鹿媒脰麓脨脨screencap脙眉脕卯陆脴脥录拢卢2.2脪脭脧脗脰卤陆脫露脕fb陆脴脥录
 	 */
@@ -394,7 +368,7 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 			e.printStackTrace();
 		}
 	}
-
+    /*
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event)
 	{
@@ -433,7 +407,7 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 			return true;
 		}
 		return false;
-	}
+	}*/
 	@SuppressLint("UseSparseArrays")
 	private void reLoadPofileFile(String name)
 	{
@@ -563,7 +537,6 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 		}
 		return true;
 	}
-	@SuppressWarnings("unused")
 	private static JnsIMEProfile iteratorKeyList(List<JnsIMEProfile> keylist, int scancode)
 	{
 		if(keylist==null)
@@ -582,6 +555,7 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 				 SharedPreferences pre = PreferenceManager.getDefaultSharedPreferences(this);
 				 Editor ed = pre.edit();
 				 ed.putBoolean("floatViewS", true);
+				 ed.commit();
 				 Message msg = new Message();
 				 msg.what = SHOW_WINDOW;
 				 floatingHandler.sendMessage(msg);
@@ -591,6 +565,11 @@ public class JnsIMEInputMethodService extends InputMethodService implements andr
 			case DialogInterface.BUTTON_NEGATIVE:
 				break;
 		}
+	}
+	@Override
+	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -223,6 +223,7 @@ public class JnsEnvInit {
 	private static void chmodDevicdeFile() throws IOException
 	{
 		dos.flush();
+		dos.writeBytes("chmod 777 /dev/uinput \n");
 		dos.writeBytes("chmod 777 /dev/input/* \n");
 		dos.flush();
 	}

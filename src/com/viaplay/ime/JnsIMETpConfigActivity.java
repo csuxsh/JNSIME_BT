@@ -372,17 +372,6 @@ public class JnsIMETpConfigActivity extends Activity implements OnTouchListener,
 		if (bop.r > 0 && (event.getScanCode() == 0)) 
 		{ //touchR == 0 则是触摸点和按键的映射，touchR > 0则是摇杆区域映射
 			bop.color = Color.GREEN;
-			DisplayMetrics dm = this.getResources().getDisplayMetrics();
-			//if ((bop.x > (dm.widthPixels / 2)) && ((bop.x - bop.r) <=  (dm.widthPixels / 2))) 
-			//{ //如果圆的中心点X坐标bop.x落在屏的右半边，则这个圆是右摇杆区域，反之则是左摇杆区域
-			//	Toast.makeText(this, this.getString(R.string.invalid_joystick_area), Toast.LENGTH_SHORT).show();
-			//	return false;
-			//}
-			//else if ((bop.x < (dm.widthPixels /2)) && ((bop.x + bop.r) >= (dm.widthPixels /2)))
-			//{
-			//	Toast.makeText(this, this.getString(R.string.invalid_joystick_area), Toast.LENGTH_SHORT).show();
-			//	return false;
-			//}
 			//else 
 			if (bop.r <= 30)
 			{
@@ -391,10 +380,8 @@ public class JnsIMETpConfigActivity extends Activity implements OnTouchListener,
 				return false;
 			}
 			if(event.getKeyCode() == KeyEvent.KEYCODE_R )
-				//((bop.x - bop.r) > (dm.widthPixels/2)) 
 			{ //右摇杆区坿				
 				if (hasRightJoystick &&( perbop.r == bop.r)){
-				//	Toast.makeText(this, this.getString(R.string.has_right_joystick), Toast.LENGTH_SHORT).show();
 					return false;
 				}
 				perbop.r = bop.r;

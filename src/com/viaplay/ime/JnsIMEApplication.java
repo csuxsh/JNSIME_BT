@@ -1,7 +1,6 @@
 package com.viaplay.ime;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import java.util.Set;
 import com.viaplay.ime.bean.JnsIMEBtDeviceInfo;
 
 import android.app.Application;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -27,6 +25,7 @@ public class JnsIMEApplication extends Application {
 	{
 		super.onCreate();
 		SharedPreferences sp = this.getSharedPreferences("devicelist", Context.MODE_PRIVATE);
+		@SuppressWarnings("unchecked")
 		Set<Entry<String, String>> deviceSet = ((Map<String, String>) sp.getAll()).entrySet();
 		Iterator<Entry<String, String>> it = deviceSet.iterator();
 		while(it.hasNext())

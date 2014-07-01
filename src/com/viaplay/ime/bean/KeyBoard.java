@@ -11,67 +11,158 @@ import android.view.KeyEvent;
  *
  */
 public class KeyBoard {
-	
+
 	private Map<String, Integer> keyMap = new HashMap<String, Integer>();
+
+	public  static Map<Integer, Integer> scanCodes = new HashMap<Integer, Integer>();
+
 	/**
 	 *  当前的键盘layout数组
 	 */
 	private String keyboardLayout[][];
-	
+
 	/**
 	 *  字母键盘的数据信息
 	 */
 	public static  final String keyboard_abc[][]=
-	{
+		{
 		{"Q","W","E","R","T","Y","U","I","O","P"},
 		{"A","S","D","F","G","H","J","K","L","Enter"},
 		{"123","Z","X","C","V","B","N","M","BackSpace",""},
 		{"LShift","LCtrl","LAtl","Space","","","","RAlt","RCtrl","RShift"}
-	};
+		};
 	/**
 	 *  数字键盘的数据信息
 	 */
 	public static  final String keyboard_123[][]=
-	{
+		{
 		{"1","2","3","4","5","6","7","8","9","0"},
 		{"Esc","Tab","","","","","","Back","Inset","Del"},
 		{"F1","F2","F3","F4","F5","F6","F7","F8","F9","F10"},
 		{"abc","F11","F12","","","","P-Up","P-Down","Home","End"}
-	};
+		};
 	/**
 	 *  GamePad键盘的数据信息
 	 */
 	public static  final String keyboard_gamepad[][]=
-	{
+		{
 		{"L1","L2","","","","","","","R1","R2"},
 		{"","Up","","","","","","GameA","GameB","GameC"},
 		{"Left","Center","Right","Select","","","Start","GameX","GameY","GameZ"},
 		{"","Down","","ThumbL","","","ThumbR","","",""}
-	};
+		};
 	public final static int LAYOUT_ABC_INDEX = 1;
 	public final static int LAYOUT_123_INDEX = 2;	
 	public final static int LAYOUT_GAMEPAD_INDEX = 3;
-	
 
+	static{
+		scanCodes.put(KeyEvent.KEYCODE_Q, 16);
+		scanCodes.put(KeyEvent.KEYCODE_W, 17); 
+		scanCodes.put(KeyEvent.KEYCODE_E, 18); 
+		scanCodes.put(KeyEvent.KEYCODE_R, 19); 
+		scanCodes.put(KeyEvent.KEYCODE_T, 20); 
+		scanCodes.put(KeyEvent.KEYCODE_Y, 21); 
+		scanCodes.put(KeyEvent.KEYCODE_U, 22); 
+		scanCodes.put(KeyEvent.KEYCODE_I, 23); 
+		scanCodes.put(KeyEvent.KEYCODE_O, 24); 
+		scanCodes.put(KeyEvent.KEYCODE_P, 25); 
+		scanCodes.put(KeyEvent.KEYCODE_A, 30); 
+		scanCodes.put(KeyEvent.KEYCODE_S, 31); 
+		scanCodes.put(KeyEvent.KEYCODE_D, 32); 
+		scanCodes.put(KeyEvent.KEYCODE_F, 33); 
+		scanCodes.put(KeyEvent.KEYCODE_G, 34); 
+		scanCodes.put(KeyEvent.KEYCODE_H, 35); 
+		scanCodes.put(KeyEvent.KEYCODE_J, 36); 
+		scanCodes.put(KeyEvent.KEYCODE_K, 37); 
+		scanCodes.put(KeyEvent.KEYCODE_L, 38); 
+		scanCodes.put(KeyEvent.KEYCODE_ENTER, 28);  
+		scanCodes.put(KeyEvent.KEYCODE_Z, 44); 
+		scanCodes.put(KeyEvent.KEYCODE_X, 45); 
+		scanCodes.put(KeyEvent.KEYCODE_C, 46); 
+		scanCodes.put(KeyEvent.KEYCODE_V, 47); 
+		scanCodes.put(KeyEvent.KEYCODE_B, 48); 
+		scanCodes.put(KeyEvent.KEYCODE_N, 49); 
+		scanCodes.put(KeyEvent.KEYCODE_M, 50); 
+		scanCodes.put(KeyEvent.KEYCODE_FORWARD_DEL, 43);
+		scanCodes.put(KeyEvent.KEYCODE_SHIFT_LEFT, 42);
+		scanCodes.put(KeyEvent.KEYCODE_CTRL_LEFT, 29);
+		scanCodes.put(KeyEvent.KEYCODE_ALT_LEFT, 56);
+		scanCodes.put(KeyEvent.KEYCODE_SPACE, 57);
+		scanCodes.put(KeyEvent.KEYCODE_SHIFT_RIGHT, 54);
+		scanCodes.put(KeyEvent.KEYCODE_CTRL_RIGHT, 97);
+		scanCodes.put(KeyEvent.KEYCODE_ALT_RIGHT, 100);
+		scanCodes.put(KeyEvent.KEYCODE_1, 2);
+		scanCodes.put(KeyEvent.KEYCODE_2, 3); 
+		scanCodes.put(KeyEvent.KEYCODE_3, 4); 
+		scanCodes.put(KeyEvent.KEYCODE_4, 5); 
+		scanCodes.put(KeyEvent.KEYCODE_5, 6); 
+		scanCodes.put(KeyEvent.KEYCODE_6, 7); 
+		scanCodes.put(KeyEvent.KEYCODE_7, 8); 
+		scanCodes.put(KeyEvent.KEYCODE_8, 9); 
+		scanCodes.put(KeyEvent.KEYCODE_9, 10); 
+		scanCodes.put(KeyEvent.KEYCODE_0, 11); 
+		scanCodes.put(KeyEvent.KEYCODE_F1, 59); 
+		scanCodes.put(KeyEvent.KEYCODE_F2, 60); 
+		scanCodes.put(KeyEvent.KEYCODE_F3, 61); 
+		scanCodes.put(KeyEvent.KEYCODE_F4, 62); 
+		scanCodes.put(KeyEvent.KEYCODE_F5, 63); 
+		scanCodes.put(KeyEvent.KEYCODE_F6, 64); 
+		scanCodes.put(KeyEvent.KEYCODE_F7, 65); 
+		scanCodes.put(KeyEvent.KEYCODE_F8, 66); 
+		scanCodes.put(KeyEvent.KEYCODE_F9, 67); 
+		scanCodes.put(KeyEvent.KEYCODE_F10, 68); 
+		scanCodes.put(KeyEvent.KEYCODE_F11, 87); 
+		scanCodes.put(KeyEvent.KEYCODE_F12, 88); 
+		scanCodes.put(KeyEvent.KEYCODE_ESCAPE, 1); 
+		scanCodes.put(KeyEvent.KEYCODE_TAB, 15); 
+		scanCodes.put(KeyEvent.KEYCODE_BACK, 158);
+		scanCodes.put(KeyEvent.KEYCODE_INSERT, 110); 
+		scanCodes.put(KeyEvent.KEYCODE_DEL, 14); 
+		scanCodes.put(KeyEvent.KEYCODE_PAGE_UP, 104); 
+		scanCodes.put(KeyEvent.KEYCODE_PAGE_DOWN, 109); 
+		scanCodes.put(KeyEvent.KEYCODE_HOME, 172); 
+		scanCodes.put(KeyEvent.KEYCODE_ENDCALL, 0);
+		scanCodes.put(KeyEvent.KEYCODE_MINUS, 12);
+		scanCodes.put(KeyEvent.KEYCODE_EQUALS, 13);
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_L1, 310);
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_L2, 312); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_R1, 311); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_R2, 313); 
+		scanCodes.put(KeyEvent.KEYCODE_DPAD_UP, 103); 
+		scanCodes.put(KeyEvent.KEYCODE_DPAD_DOWN, 108); 
+		scanCodes.put(KeyEvent.KEYCODE_DPAD_LEFT, 105); 
+		scanCodes.put(KeyEvent.KEYCODE_DPAD_RIGHT, 106); 
+		scanCodes.put(KeyEvent.KEYCODE_DPAD_CENTER, 353); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_A, 304); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_B, 305); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_C, 306); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_X, 307); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_Y, 308); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_Z, 309); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_SELECT, 314); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_START, 315); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_THUMBL, 317); 
+		scanCodes.put(KeyEvent.KEYCODE_BUTTON_THUMBR, 318); 
+	}
 
 	public KeyBoard(int Layout_Indx)
 	{
 		switch(Layout_Indx)
 		{
-			case LAYOUT_ABC_INDEX:
-				putKeyBoard_ABCMap();
-				keyboardLayout = keyboard_abc;
-				break;
-			case LAYOUT_123_INDEX:
-				putKeyBoard_123Map();
-				keyboardLayout = keyboard_123;
-				break;
-			case LAYOUT_GAMEPAD_INDEX:
-				putKeyBoard_GamePadMap();
-				keyboardLayout = keyboard_gamepad;
-				break;
+		case LAYOUT_ABC_INDEX:
+			putKeyBoard_ABCMap();
+			keyboardLayout = keyboard_abc;
+			break;
+		case LAYOUT_123_INDEX:
+			putKeyBoard_123Map();
+			keyboardLayout = keyboard_123;
+			break;
+		case LAYOUT_GAMEPAD_INDEX:
+			putKeyBoard_GamePadMap();
+			keyboardLayout = keyboard_gamepad;
+			break;
 		}
-		
+
 	}
 	public Integer getKeyCode(String lable)
 	{
@@ -84,7 +175,7 @@ public class KeyBoard {
 	public void setKeyboardLayout(String[][] keyboardLayout) {
 		this.keyboardLayout = keyboardLayout;
 	}
-	
+
 	private void putKeyBoard_ABCMap()
 	{
 		keyMap.put("Q", KeyEvent.KEYCODE_Q);
@@ -160,7 +251,7 @@ public class KeyBoard {
 		keyMap.put("ABC", null);
 		keyMap.put("-", KeyEvent.KEYCODE_MINUS);
 		keyMap.put("=", KeyEvent.KEYCODE_EQUALS);
-		
+
 	}
 	private void putKeyBoard_GamePadMap()
 	{
@@ -185,7 +276,7 @@ public class KeyBoard {
 		keyMap.put("Start", KeyEvent.KEYCODE_BUTTON_START); 
 		keyMap.put("ThumbL", KeyEvent.KEYCODE_BUTTON_THUMBL); 
 		keyMap.put("ThumbR", KeyEvent.KEYCODE_BUTTON_THUMBR); 
-		
+
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.viaplay.ime;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,13 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.viaplay.ime.R;
+import com.viaplay.ime.bluetooth.JnsIMEBtDataProcess;
 import com.viaplay.ime.bluetooth.JnsIMEBtServerThread;
-import com.viaplay.ime.jni.JoyStickEvent;
-import com.viaplay.ime.jni.RawEvent;
-import com.viaplay.ime.uiadapter.JnsIMEBTDeviceListAdapter;
-import com.viaplay.ime.uiadapter.JnsIMEControlListAdapter;
-import com.viaplay.ime.util.SendEvent;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -27,16 +23,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.Display;
-import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -48,6 +40,8 @@ import android.widget.Toast;
  */
 public class JnsIMEBtService extends Service {
 
+	
+	public static boolean isalive = false;
 	ListView devicesView;
 	Dialog devicelistdialog;
 	public Handler procehandler;
@@ -56,7 +50,21 @@ public class JnsIMEBtService extends Service {
 	public final static int CONNECT_OK = 0x03;
 	public final static int SEARCH_DEVICE = 0x04;
 	final BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
-	Map<BluetoothDevice, Integer> deviceMap = new HashMap<BluetoothDevice, Integer>(); 
+
+	static class BtHandler extends Handler
+	{
+		WeakReference<JnsIMEBtService> mActivity;
+		   
+		BtHandler(JnsIMEBtService context) {
+                mActivity = new WeakReference<JnsIMEBtService>(context);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+        
+          }
+        
+	};
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -64,29 +72,28 @@ public class JnsIMEBtService extends Service {
 		return null;
 	}
 	@Override
+	public void onDestroy()
+	{
+		super.onDestroy();
+		if(JnsIMEBtDataProcess.mWakeLock.isHeld())
+			JnsIMEBtDataProcess.mWakeLock.release();
+		this.isalive = false;
+	}
+	@Override
 	public void onCreate()
 	{
 		super.onCreate();
+		this.isalive = true;
 		JnsIMEApplication app = (JnsIMEApplication) this.getApplication();
 		app.btService = this;
 		BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
 		if(!mAdapter.isEnabled())
 			requestBTEnable();
-		/*
-		if(mAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE)
-		{
-			 Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);  
-			 // 设置蓝牙可见性，最多300秒   
-			 intent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);  
-			 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			 this.startActivity(intent);  
-
-		}
-		 */
+		
 		Set<BluetoothDevice> devices = mAdapter.getBondedDevices();
 		List<BluetoothDevice> devicelist =  FilterDevice(devices);
 		// 设备连接进度条
-		procehandler = new Handler()
+		procehandler = new BtHandler(this)
 		{
 			ProgressDialog pDialog = new ProgressDialog(JnsIMEBtService.this);
 			
@@ -98,29 +105,6 @@ public class JnsIMEBtService extends Service {
 				switch(msg.what)
 				{
 				case START_CONNECT:
-					//connectDevices();
-					/*
-					pDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-					pDialog.setMessage("connecting device...");
-					pDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);  
-
-					WindowManager.LayoutParams lp = pDialog.getWindow().getAttributes();    
-					WindowManager wm = (WindowManager)JnsIMEBtService.this   
-					.getSystemService(Context.WINDOW_SERVICE);    
-					Display display = wm.getDefaultDisplay();    
-					if (display.getHeight() > display.getWidth())    
-					{    
-						lp.width = (int) (display.getWidth() * 1.0);    
-					}    
-					else    
-					{    
-						lp.width = (int) (display.getWidth() * 0.25);    
-					}    
-
-					pDialog.getWindow().setAttributes(lp);  
-					Log.d("JnsEnvInit", "showdialog");
-					pDialog.show();  
-					*/
 					break;
 				case CONNECT_TIMEOUT:
 					pDialog.setButton("Sure", new DialogInterface.OnClickListener()
@@ -143,14 +127,14 @@ public class JnsIMEBtService extends Service {
 				super.handleMessage(msg);
 			}
 		};
-		
+		/*
 		Message msg = new Message();
 		if(devicelist.size() == 0)
-			msg.what = this.SEARCH_DEVICE;
+			msg.what = JnsIMEBtService.SEARCH_DEVICE;
 		else
-			msg.what = this.START_CONNECT;
+			msg.what = JnsIMEBtService.START_CONNECT;
 			this.procehandler.sendMessage(msg);
-		
+		*/
 	}
 	/**
 	 * 对码指定设备
@@ -181,7 +165,6 @@ public class JnsIMEBtService extends Service {
 			btserver.start();
 		}
 	}
-	@SuppressWarnings("deprecation")
 	/**
 	 *  若只有一个已对码的蓝牙设备，则直接连接
 	 *  <p>若有多个已对码设备则，弹出列表让用户选择
@@ -189,98 +172,15 @@ public class JnsIMEBtService extends Service {
 	 */
 	void showBtDeviceList()
 	{
+		BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
+		if(!mAdapter.isEnabled())
+		{
+			requestBTEnable();
+			return;
+		}
 		Intent in = new Intent(this,JnsIMEBtListActivity.class);
 		in.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		this.startActivity(in);
-		/*
-		Set<BluetoothDevice> devices = mAdapter.getBondedDevices();
-		List<BluetoothDevice> devicelist =  FilterDevice(devices);
-
-		
-		/*
-		else if(devicelist.size() == 0)
-		{
-			devicelistdialog = null;
-			devicesView = new ListView(this);
-			devicesView.setOnItemClickListener(new OnItemClickListener()
-			{
-
-				@Override
-				public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-						long arg3) {
-					// TODO Auto-generated method stub
-					Toast.makeText(JnsIMEBtService.this, "start JnsIMEBtServer", Toast.LENGTH_LONG).show();
-					JnsIMEBtServerThread btserver = new JnsIMEBtServerThread((BluetoothDevice) devicesView.getItemAtPosition(arg2), JnsIMEBtService.this);
-					btserver.start();
-					devicelistdialog.cancel();
-				}
-
-			});
-			deviceAdapter.setDeviceSet(devicelist);
-			devicesView.setAdapter(deviceAdapter);
-			devicelistdialog = new AlertDialog.Builder(this).setTitle("select a device to connect").setView(devicesView).create();
-			devicelistdialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);  
-			WindowManager.LayoutParams lp = devicelistdialog.getWindow().getAttributes();    
-			WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);    
-			Display display = wm.getDefaultDisplay();    
-			if (display.getHeight() > display.getWidth())    
-			{    
-				lp.width = (int) (display.getWidth() * 1.0);    
-			}    
-			else    
-			{    
-				lp.width = (int) (display.getWidth() * 0.5);    
-			}    
-			devicelistdialog.getWindow().setAttributes(lp);  
-			Log.d("JnsEnvInit", "showdialog");
-			devicelistdialog.show(); 
-		}
-		*/
-			/*
-			mAdapter.startDiscovery();
-			devicelistdialog = null;
-			devicesView = new ListView(this);
-			devicesView.setOnItemClickListener(new OnItemClickListener()
-			{
-
-				@Override
-				public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-						long arg3) {
-					// TODO Auto-generated method stub
-					Toast.makeText(JnsIMEBtService.this, "start JnsIMEBtServer", Toast.LENGTH_LONG).show();
-					@SuppressWarnings("unused")
-					int state;
-					if(((BluetoothDevice) devicesView.getItemAtPosition(arg2)).getBondState() == BluetoothDevice.BOND_NONE)
-					{	
-						state = bondDevice((BluetoothDevice) devicesView.getItemAtPosition(arg2));
-					}
-					JnsIMEBtServerThread btserver = new JnsIMEBtServerThread((BluetoothDevice) devicesView.getItemAtPosition(arg2), JnsIMEBtService.this);
-					btserver.start();
-					mAdapter.cancelDiscovery();
-					devicelistdialog.cancel();
-				}
-
-			});
-			devicesView.setAdapter(deviceAdapter);
-			devicelistdialog = new AlertDialog.Builder(this).setTitle("select a device to connect").setView(devicesView).create();
-			devicelistdialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);  
-			WindowManager.LayoutParams lp = devicelistdialog.getWindow().getAttributes();    
-			WindowManager wm = (WindowManager)getSystemService(Context.WINDOW_SERVICE);    
-			Display display = wm.getDefaultDisplay();    
-			if (display.getHeight() > display.getWidth())    
-			{    
-				lp.width = (int) (display.getWidth() * 1.0);    
-			}    
-			else    
-			{    
-				lp.width = (int) (display.getWidth() * 0.5);    
-			}    
-			devicelistdialog.getWindow().setAttributes(lp);  
-			Log.d("JnsEnvInit", "showdialog");
-			devicelistdialog.show();  */
-		/*
-
-		 */
 	}
 
 	/**

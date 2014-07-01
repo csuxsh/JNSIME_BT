@@ -1,6 +1,7 @@
 package com.viaplay.ime;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -177,6 +178,9 @@ public class JnsIMEKeyMappingActivity extends Activity implements OnClickListene
 	private boolean saveFile()
 	{
 		try {
+			File f = new File(this.getFilesDir()+"fileName");
+			if(f.exists())
+				f.delete();
 			FileOutputStream fos = this.openFileOutput(fileName, Context.MODE_PRIVATE);
 			Iterator<Entry<Integer, JnsIMEKeyMap>> iterator  = keys.entrySet().iterator();
 			while(iterator.hasNext())

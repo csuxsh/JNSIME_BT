@@ -16,6 +16,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.os.Message;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.util.Log;
 /**
  * 处理蓝牙的数据传输。
@@ -27,7 +29,7 @@ import android.util.Log;
 public class JnsIMEBtDataProcess extends Thread{
 
 	final static int HEAD_TAG = 0xa1;
-	final static int GAME_DATA_TAG = 0x05;
+	final static int GAME_DATA_TAG = 0x06;
 	final static int GAME_DATA_LENGTH = 11;
 	final static int KEYBOARD_DATA_TAG = 0x01;
 	final static int KEYBOARD_DATA_LENGTH =7;
@@ -45,13 +47,13 @@ public class JnsIMEBtDataProcess extends Thread{
 	final static int BUTTON2_INDEX = 6;
 	
 	
-	private final String TAG = "Bt_DataProcess";
+	private final String TAG = "JNS_Bt_DataProcess";
 	private BluetoothSocket socket = null;
 	static byte[] gamePadData = {127,127,127,127,15,0,0,0,0,0,0};
 	static byte[] keyboardData = new byte[KEYBOARD_DATA_LENGTH];
 	private BluetoothDevice device;
 	private Context mContext;
-	
+	public static WakeLock mWakeLock = null;
 
 	public JnsIMEBtDataProcess(BluetoothSocket socket, BluetoothDevice device, Context mContext)
 	{
@@ -61,17 +63,22 @@ public class JnsIMEBtDataProcess extends Thread{
 		try {
 			new OutputStreamWriter(socket.getOutputStream());
 			new InputStreamReader(socket.getInputStream());
+			Log.d(TAG, "a client connect:"+socket.getRemoteDevice().getAddress());
+			PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+			mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK
+		                | PowerManager.ON_AFTER_RELEASE, TAG);  
+			if(!mWakeLock.isHeld())
+				mWakeLock.acquire();  
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 
 	@SuppressLint("NewApi")
 	public void run()
 	{
-		Log.d(TAG, "a client connect:"+socket.getRemoteDevice().getAddress());
-
 		while(true)
 		{
 			try {
@@ -81,36 +88,11 @@ public class JnsIMEBtDataProcess extends Thread{
 			//	JnsIMEBtServerThread btserver = new JnsIMEBtServerThread(device, mContext);
 			//	btserver.start();
 				e.printStackTrace();
+				if(mWakeLock.isHeld())
+					mWakeLock.release();
+			    Log.d(TAG,"device disconnect");
 				return;
 			}
-			/*
-			BufferedReader br = new BufferedReader(isr);
-			try {
-				String line = br.readLine();
-				Log.d(TAG, "line = "+line);
-				processData(line);
-				PrintWriter pw = null;
-				try {
-					pw = new PrintWriter(osw);
-					pw.write("ok\n");
-					pw.flush();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					socket.close();
-					e.printStackTrace();
-					break;
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				try {
-					socket.close();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				e.printStackTrace();
-				break;
-			}*/
 		}
 		
 	}
@@ -124,7 +106,7 @@ public class JnsIMEBtDataProcess extends Thread{
 				for(int i = 0; i < buffer.length; i++)
 				{
 					//gamePadData[i] = buffer[i];
-					Log.d(TAG, "data["+(i+2)+"]"+buffer[i]);
+					//Log.d(TAG, "data["+(i+2)+"]"+buffer[i]);
 				}
 				// 判断 JOYSTICK 值是否有变化
 				if((buffer[ABS_X_INDEX] != gamePadData[ABS_X_INDEX]) ||
@@ -168,7 +150,7 @@ public class JnsIMEBtDataProcess extends Thread{
 				for(int i = 0; i < gamePadData.length; i++)
 				{
 					gamePadData[i] = buffer[i];
-					Log.d(TAG, "data["+(i+2)+"]"+buffer[i]);
+					//Log.d(TAG, "data["+(i+2)+"]"+buffer[i]);
 				}
 			}
 			else

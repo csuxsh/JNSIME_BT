@@ -2,13 +2,7 @@ package com.viaplay.ime;
 
 
 import com.viaplay.ime.R;
-import com.viaplay.ime.bluetooth.JnsIMEBtServerThread;
-
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -20,16 +14,9 @@ import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.Toast;
-import android.widget.AdapterView.OnItemClickListener;
-
 import android.util.Log;
 
 /**
@@ -39,10 +26,11 @@ import android.util.Log;
  *
  */
 
+@SuppressLint("NewApi")
 public class JnsIMESettingActivity extends PreferenceActivity implements OnPreferenceClickListener, OnPreferenceChangeListener{
 	public static final String TAG = "BlueoceanControllerActivity";
 	Preference quit;
-	Preference changeime;
+	CheckBoxPreference changeime;
 	Preference help;
 	Preference search;
 	static CheckBoxPreference cp;
@@ -53,23 +41,27 @@ public class JnsIMESettingActivity extends PreferenceActivity implements OnPrefe
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.settings);
 		quit = this.findPreference(this.getString(R.string.quit));
-		changeime = this.findPreference(this.getString(R.string.changeime));
+		changeime = (CheckBoxPreference) this.findPreference(this.getString(R.string.changeime));
 		help = this.findPreference(this.getString(R.string.help));
 		search = this.findPreference(this.getString(R.string.Search_Device));
-			cp = (CheckBoxPreference) this.findPreference(this.getString(R.string.floatViewS));
+		cp = (CheckBoxPreference) this.findPreference(this.getString(R.string.floatViewS));
 		quit.setOnPreferenceClickListener(this);
-		changeime.setOnPreferenceClickListener(this);
+		changeime.setOnPreferenceChangeListener(this);
 		help.setOnPreferenceClickListener(this);
 		search.setOnPreferenceClickListener(this);
 		cp.setOnPreferenceChangeListener(this);
 		JnsIMECoreService.activitys.add(this);
 		SharedPreferences pre = PreferenceManager.getDefaultSharedPreferences(this);
+		
 		if(pre.getBoolean("floatViewS", false))
-		{
 			cp.setChecked(true);
-		}
 		else
 			cp.setChecked(false);
+		
+		if(pre.getBoolean("changime", false))
+			changeime.setChecked(true);
+		else
+			changeime.setChecked(false);
 	}
 
 
@@ -105,20 +97,18 @@ public class JnsIMESettingActivity extends PreferenceActivity implements OnPrefe
 		if(arg0.getKey().equals(search.getKey()))
 		{
 			JnsIMEApplication application = (JnsIMEApplication) this.getApplication();
-			while(application.btService == null)
-			{	
-				Toast.makeText(this, "BTService starting....", Toast.LENGTH_SHORT).show();
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			if(!JnsIMEBtService.isalive)
+			{
+				Intent in = new Intent("com.viaplay.ime.JnsIMEBtService");
+				this.startService(in);
+				Toast.makeText(this, "正在启动viaplay蓝牙服务，请重新点击搜索", Toast.LENGTH_LONG).show();
 			}
-			Message msg = new Message();
-			msg.what = JnsIMEBtService.SEARCH_DEVICE;
-			application.btService.procehandler.sendMessage(msg);
-			
+			else
+			{	
+				Message msg = new Message();
+				msg.what = JnsIMEBtService.SEARCH_DEVICE;
+				application.btService.procehandler.sendMessage(msg);
+			}
 			/*
 			Intent intent = new Intent();
 			intent.setClass(this, com.viaplay.ime.JnsIMEBtService.class);
@@ -134,9 +124,36 @@ public class JnsIMESettingActivity extends PreferenceActivity implements OnPrefe
 		}
 		return false;
 	}
-		@Override
+	@Override
 	public boolean onPreferenceChange(Preference preference, Object newValue) {
 		// TODO Auto-generated method stub
+		if(preference == changeime)
+		{
+			if(!changeime.isChecked())
+			{
+				//cp.setSummary("true");
+				changeime.setChecked(true);
+				SharedPreferences pre = PreferenceManager.getDefaultSharedPreferences(this);
+				Editor edit = pre.edit();
+				edit.putBoolean("changime", true);
+				edit.commit();
+				Intent in = new Intent("com.viaplay.ime.JnsIMEInputMethodService");
+				this.startService(in);
+			}
+			else
+			{
+				changeime.setChecked(false);
+				SharedPreferences pre = PreferenceManager.getDefaultSharedPreferences(this);
+				Editor edit = pre.edit();
+				edit.putBoolean("changime", false);
+				edit.commit();
+				if(JnsIMEInputMethodService.jnsIMEInUse)
+				{
+					Intent in = new Intent("com.viaplay.ime.JnsIMEInputMethodService");
+					this.stopService(in);
+				}
+			}
+		}
 		if(preference == cp)
 		{	
 			if(!cp.isChecked())

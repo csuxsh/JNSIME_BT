@@ -1,24 +1,17 @@
 package com.viaplay.ime;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
+import java.lang.ref.WeakReference;
 import com.viaplay.ime.R;
-import com.viaplay.ime.jni.InputAdapter;
-import com.viaplay.ime.uiadapter.JnsIMEBTDeviceListAdapter;
 import com.viaplay.ime.uiadapter.JnsIMEControlListAdapter;
 
 
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,6 +29,20 @@ public class JnsIMEControllerActivity  extends Activity{
 	public static Handler handler;
 	final BluetoothAdapter mAdapter = BluetoothAdapter.getDefaultAdapter();
 	//JnsIMEApplication app; 
+    static class DeviceHandler extends Handler
+	{
+		WeakReference<JnsIMEControllerActivity> mActivity;
+		   
+		DeviceHandler(JnsIMEControllerActivity context) {
+                mActivity = new WeakReference<JnsIMEControllerActivity>(context);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+        
+          }
+        
+	};
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,8 +51,8 @@ public class JnsIMEControllerActivity  extends Activity{
 		adapter.setParent(this);
 		adapter.setDeviceSet(JnsIMEApplication.mDeviceInfoList);
 		list.setAdapter(adapter);
-		//app = (JnsIMEApplication) this.getApplication();
-		handler = new Handler()
+		@SuppressWarnings("unused")
+		final Handler hander = new DeviceHandler(this)
 		{
 			@SuppressLint("HandlerLeak")
 			public void handleMessage(Message msg)

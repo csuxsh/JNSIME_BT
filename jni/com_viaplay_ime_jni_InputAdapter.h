@@ -9,10 +9,13 @@
 #endif
 #ifndef _Included_com_viaplay_ime_jni_InputAdapter
 #define _Included_com_viaplay_ime_jni_InputAdapter
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef com_viaplay_ime_jni_InputAdapter_SELECT_SCANCODE
+#define com_viaplay_ime_jni_InputAdapter_SELECT_SCANCODE 314L
+#undef com_viaplay_ime_jni_InputAdapter_START_SCANCODE
+#define com_viaplay_ime_jni_InputAdapter_START_SCANCODE 315L
 
 extern  pthread_cond_t getDeviceCond;
 extern  pthread_mutex_t getDeviceMutex;
@@ -43,6 +46,22 @@ JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_stop
 
 /*
  * Class:     com_viaplay_ime_jni_InputAdapter
+ * Method:    setAxis
+ * Signature: (Lcom/viaplay/ime/jni/RawEvent;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_setAxis
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     com_viaplay_ime_jni_InputAdapter
+ * Method:    setButton
+ * Signature: (Lcom/viaplay/ime/jni/RawEvent;)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_setButton
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     com_viaplay_ime_jni_InputAdapter
  * Method:    getKey
  * Signature: (Lcom/viaplay/ime/jni/RawEvent;)V
  */
@@ -52,7 +71,7 @@ JNIEXPORT void JNICALL Java_com_viaplay_ime_jni_InputAdapter_getKey
 /*
  * Class:     com_viaplay_ime_jni_InputAdapter
  * Method:    getJoyStick
- * Signature: (Lcom/viaplay/ime/jni/RawEvent;)V
+ * Signature: (Lcom/viaplay/ime/jni/JoyStickEvent;)Z
  */
 JNIEXPORT jboolean JNICALL Java_com_viaplay_ime_jni_InputAdapter_getJoyStick
   (JNIEnv *, jclass, jobject);
@@ -69,4 +88,3 @@ JNIEXPORT jobject JNICALL Java_com_viaplay_ime_jni_InputAdapter_getDeviceList
 }
 #endif
 #endif
-
